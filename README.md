@@ -196,6 +196,16 @@ function App() {
 
 ---
 
+## 📱 Mobile / RWD
+
+各 game 的內層「機器」元件（轉盤、刮刮卡 canvas、轉輪等）目前**寬度設計鎖在 320–360 px**，為了視覺校準。
+
+- **建議容器寬度**：≥ 360 px。多數現代手機（iPhone SE 寬 375 px、iPhone 12 寬 390 px）都符合。
+- **更窄容器**：以您自己的 layout 控制（`max-width` / `transform: scale()` / 容器查詢）。
+- **完整 RWD 規劃**：v0.2.0 將每款 game 改成內層 percentage / container-aware width，目前 v0.1.x 屬於 desktop-first 階段。
+
+---
+
 ## 🌐 Framework 相容
 
 | Framework | Status |
