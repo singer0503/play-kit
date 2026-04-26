@@ -1,5 +1,57 @@
 # @play-kit/games
 
+## 0.4.0
+
+### Minor Changes
+
+- **新增兩道 CI quality gate，把 a11y / docs 從「廣告話術」變成「實測證據」**
+
+  Lib runtime 行為與 0.3.0 完全一致；本版專注於把現有承諾納入自動化驗證，
+  使「我們的 game 支援 reduced-motion」、「README 跟代碼一致」這類賣點不
+  再依賴人類記憶力。
+
+  ### Added
+
+  - **`pnpm check:readme`（`scripts/verify-readme.ts`）**
+    ts-morph parser 比對 README「事件回呼簽章對照」表 vs 各 `*Props` interface
+    的 onWin / onClaim type node。drift 立刻 fail。CI 自動跑。
+    防 0.2.x 期間 17 款裡 12 款 README 簽章寫錯的 bug 復發。
+
+  - **`pnpm e2e:audit`（`e2e/reduced-motion.spec.ts`）**
+    Playwright e2e 設 `reducedMotion: 'reduce'`，對 17 款 game 驗：
+    - 11 款動畫驅動 game（lucky-wheel / slot-machine / lotto-roll / smash-egg /
+      gift-box / doll-machine / marquee / gift-rain / ring-toss / guess-gift /
+      nine-grid）：state 必須在 1.5s 內離開 `idle`（實測 27–81ms vs 原本
+      4-5s 動畫）—— 證明 reducedMotion 真的被 honored。
+    - 6 款互動驅動 game（scratch-card / flip-match / quiz / shake / shake-dice
+      / daily-checkin）：render + 點按不 throw 任何 JS error。
+    全 17/17 跑 6.7s，CI 自動跑。
+
+  ### Changed (lib types only — runtime unchanged)
+
+  - **`useGameScale<T>(...)` 回傳型別 `RefObject<T>` → `RefObject<T | null>`**
+    跟進 React 19 `useRef<T>(null)` 精準型別。React 18 consumer 也通（JSX ref
+    prop 對兩者皆相容）。
+  - **`packages/games` devDeps `@types/react`/`@types/react-dom` 18 → 19**
+    Lib 用 React 19 types build 出 d.ts；React 19 ReactNode 是 React 18 的
+    superset，雙版本 consumer 都可用。Peer dep 仍維持 `react: ">=18 <20"`
+    （無相容性破壞）。
+
+  ### CI 完整 gate（10 道）
+
+  ```
+  biome → typecheck → unit tests (509) → check:docs → check:readme [new]
+       → check:ssr → build:lib → smoke:published (8 e2e) → docs build
+       → e2e:audit (17 reduced-motion tests) [new]
+  ```
+
+  ### Migration v0.3.0 → v0.4.0
+
+  完全相容，無 breaking change。consumer 升級 0 改動。
+  TypeScript 端若你用 `RefObject<HTMLElement>` 顯式 annotate `useGameScale`
+  返回值，可改成 `RefObject<HTMLElement | null>`（更精準）；不改也不影響編譯
+  （隱式 inference 自動跟上）。
+
 ## 0.3.0
 
 ### Minor Changes

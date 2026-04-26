@@ -59,9 +59,7 @@ test.describe('reduced-motion audit (全 17 款 game)', () => {
       await expect(game.locator('[data-state="idle"]').first()).toBeVisible();
 
       // 點第一個 enabled、非裝飾性 button
-      const btn = game
-        .locator('button:not([aria-hidden="true"]):not([disabled])')
-        .first();
+      const btn = game.locator('button:not([aria-hidden="true"]):not([disabled])').first();
       await expect(btn).toBeVisible();
       const start = Date.now();
       await btn.click();
@@ -77,9 +75,7 @@ test.describe('reduced-motion audit (全 17 款 game)', () => {
   }
 
   for (const id of INTERACTIVE_GAMES) {
-    test(`${id} (interactive): render + 主動作 button 點擊不 throw`, async ({
-      page,
-    }) => {
+    test(`${id} (interactive): render + 主動作 button 點擊不 throw`, async ({ page }) => {
       const pageErrors: string[] = [];
       page.on('pageerror', (e) => pageErrors.push(e.message));
 
@@ -88,9 +84,7 @@ test.describe('reduced-motion audit (全 17 款 game)', () => {
       await expect(game).toBeVisible();
 
       // 嘗試點第一個 enabled button（多數互動類有「開始」鈕）
-      const btn = game
-        .locator('button:not([aria-hidden="true"]):not([disabled])')
-        .first();
+      const btn = game.locator('button:not([aria-hidden="true"]):not([disabled])').first();
       const btnCount = await btn.count();
       if (btnCount > 0 && (await btn.isVisible())) {
         await btn.click().catch(() => {
