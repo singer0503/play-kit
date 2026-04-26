@@ -45,17 +45,15 @@ yarn add @play-kit/games
 ## 🚀 快速上手
 
 ```tsx
-import { LuckyWheel, PlayKitProvider, type LuckyWheelPrize } from '@play-kit/games';
+// 推薦：sub-path import — bundler 只把這款 game 拉進去（gzip ~5 KB）
+import { LuckyWheel, type LuckyWheelPrize } from '@play-kit/games/lucky-wheel';
+import { PlayKitProvider } from '@play-kit/games/i18n';
 import '@play-kit/games/styles.css';
 
 const prizes: LuckyWheelPrize[] = [
   { label: '$100', win: true,  weight: 1 },
   { label: 'Miss', win: false, weight: 4 },
   { label: '$50',  win: true,  weight: 2 },
-  { label: 'Miss', win: false, weight: 4 },
-  { label: '$20',  win: true,  weight: 3 },
-  { label: 'Miss', win: false, weight: 4 },
-  { label: '$10',  win: true,  weight: 4 },
   { label: 'Miss', win: false, weight: 4 },
 ];
 
@@ -72,6 +70,8 @@ export function App() {
   );
 }
 ```
+
+> **舊用法也支援**：`import { LuckyWheel } from '@play-kit/games'` 一樣 work，且因為 multi-entry build，bundler 同樣只會把 LuckyWheel 拉進去（tree-shake 透過 main barrel 也生效）。Sub-path 寫法只是更明確 & 對較舊的 bundler / 不擅長 tree-shake 的環境更穩。
 
 ---
 
@@ -270,15 +270,32 @@ module.exports = {
 
 ---
 
-## 📦 Bundle Size
+## 📦 Bundle Size（v0.3.0+）
 
-| Asset | Raw | Gzip |
+實測 esbuild minify + gzip，external react/react-dom：
+
+| 用法 | Raw | Gzip |
 |---|---:|---:|
-| `dist/index.js` (ESM) | 124 KB | 27 KB |
-| `dist/index.cjs` (CJS) | 81 KB | 23 KB |
-| `dist/index.css` | 65 KB | 10 KB |
+| 只用 1 款 game（如 `LuckyWheel`） | 11.43 KB | **4.83 KB** |
+| 2 款 game（`LuckyWheel + ScratchCard`） | 17.25 KB | 6.67 KB |
+| 只 `PlayKitProvider`（無 game） | 7.00 KB | 2.53 KB |
+| 全 17 款（最壞情況） | 79.90 KB | 23.84 KB |
+| `dist/styles.css` | 64.91 KB | 10.19 KB |
 
-支援 tree-shaking — 只 import 用得到的 game、bundler 會剔除其他款。
+**每加一款新 game 約 +1–3 KB gzip**。CI 自動跑 `pnpm smoke:published` 鎖死預算上限：only-LuckyWheel 不得超過 6 KB gzip、全 17 款不得超過 30 KB gzip，超標 PR 會被擋。
+
+### Tree-shaking 寫法選擇
+
+```tsx
+// ✅ Sub-path import（推薦）— 明確、對所有 bundler 都穩
+import { LuckyWheel } from '@play-kit/games/lucky-wheel';
+import { PlayKitProvider } from '@play-kit/games/i18n';
+
+// ✅ Main barrel — 也 tree-shake，需 bundler 支援 ESM sideEffects（Vite/Webpack 5/Rollup/esbuild 都行）
+import { LuckyWheel, PlayKitProvider } from '@play-kit/games';
+```
+
+兩種寫法在 Vite/Next/Webpack 5/Rollup/esbuild 下產出大小幾乎一致（差 < 100 byte）。Sub-path 的好處是**意圖明確**：reviewer 一眼看到只用了哪些 game。
 
 ---
 

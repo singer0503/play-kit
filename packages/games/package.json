@@ -1,6 +1,6 @@
 {
   "name": "@play-kit/games",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "17 React mini-games (lucky wheel, scratch card, nine-grid, slot machine, ...) with 6-state machines, a11y, SSR-safe, zero non-peer deps.",
   "keywords": [
     "react",
@@ -45,11 +45,106 @@
       "types": "./dist/styles.css.d.ts",
       "default": "./dist/styles.css"
     },
+    "./core": {
+      "types": "./dist/core/index.d.ts",
+      "import": "./dist/core/index.js",
+      "require": "./dist/core/index.cjs"
+    },
+    "./i18n": {
+      "types": "./dist/i18n/index.d.ts",
+      "import": "./dist/i18n/index.js",
+      "require": "./dist/i18n/index.cjs"
+    },
+    "./daily-checkin": {
+      "types": "./dist/games/daily-checkin/index.d.ts",
+      "import": "./dist/games/daily-checkin/index.js",
+      "require": "./dist/games/daily-checkin/index.cjs"
+    },
+    "./doll-machine": {
+      "types": "./dist/games/doll-machine/index.d.ts",
+      "import": "./dist/games/doll-machine/index.js",
+      "require": "./dist/games/doll-machine/index.cjs"
+    },
+    "./flip-match": {
+      "types": "./dist/games/flip-match/index.d.ts",
+      "import": "./dist/games/flip-match/index.js",
+      "require": "./dist/games/flip-match/index.cjs"
+    },
+    "./gift-box": {
+      "types": "./dist/games/gift-box/index.d.ts",
+      "import": "./dist/games/gift-box/index.js",
+      "require": "./dist/games/gift-box/index.cjs"
+    },
+    "./gift-rain": {
+      "types": "./dist/games/gift-rain/index.d.ts",
+      "import": "./dist/games/gift-rain/index.js",
+      "require": "./dist/games/gift-rain/index.cjs"
+    },
+    "./guess-gift": {
+      "types": "./dist/games/guess-gift/index.d.ts",
+      "import": "./dist/games/guess-gift/index.js",
+      "require": "./dist/games/guess-gift/index.cjs"
+    },
+    "./lotto-roll": {
+      "types": "./dist/games/lotto-roll/index.d.ts",
+      "import": "./dist/games/lotto-roll/index.js",
+      "require": "./dist/games/lotto-roll/index.cjs"
+    },
+    "./lucky-wheel": {
+      "types": "./dist/games/lucky-wheel/index.d.ts",
+      "import": "./dist/games/lucky-wheel/index.js",
+      "require": "./dist/games/lucky-wheel/index.cjs"
+    },
+    "./marquee": {
+      "types": "./dist/games/marquee/index.d.ts",
+      "import": "./dist/games/marquee/index.js",
+      "require": "./dist/games/marquee/index.cjs"
+    },
+    "./nine-grid": {
+      "types": "./dist/games/nine-grid/index.d.ts",
+      "import": "./dist/games/nine-grid/index.js",
+      "require": "./dist/games/nine-grid/index.cjs"
+    },
+    "./quiz": {
+      "types": "./dist/games/quiz/index.d.ts",
+      "import": "./dist/games/quiz/index.js",
+      "require": "./dist/games/quiz/index.cjs"
+    },
+    "./ring-toss": {
+      "types": "./dist/games/ring-toss/index.d.ts",
+      "import": "./dist/games/ring-toss/index.js",
+      "require": "./dist/games/ring-toss/index.cjs"
+    },
+    "./scratch-card": {
+      "types": "./dist/games/scratch-card/index.d.ts",
+      "import": "./dist/games/scratch-card/index.js",
+      "require": "./dist/games/scratch-card/index.cjs"
+    },
+    "./shake": {
+      "types": "./dist/games/shake/index.d.ts",
+      "import": "./dist/games/shake/index.js",
+      "require": "./dist/games/shake/index.cjs"
+    },
+    "./shake-dice": {
+      "types": "./dist/games/shake-dice/index.d.ts",
+      "import": "./dist/games/shake-dice/index.js",
+      "require": "./dist/games/shake-dice/index.cjs"
+    },
+    "./slot-machine": {
+      "types": "./dist/games/slot-machine/index.d.ts",
+      "import": "./dist/games/slot-machine/index.js",
+      "require": "./dist/games/slot-machine/index.cjs"
+    },
+    "./smash-egg": {
+      "types": "./dist/games/smash-egg/index.d.ts",
+      "import": "./dist/games/smash-egg/index.js",
+      "require": "./dist/games/smash-egg/index.cjs"
+    },
     "./package.json": "./package.json"
   },
   "files": ["dist", "README.md", "CHANGELOG.md", "LICENSE"],
   "scripts": {
-    "build": "vite build && tsc --emitDeclarationOnly -p tsconfig.build.json && node scripts/postbuild.mjs",
+    "build": "vite build && node scripts/postbuild.mjs",
     "dev": "vite build --watch",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",

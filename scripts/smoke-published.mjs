@@ -70,7 +70,8 @@ try {
   // ----- install -----
   execSync('npm init -y', { cwd: TEMP, stdio: 'pipe' });
   console.log('[smoke] installing into temp dir...');
-  execSync(`npm i "${installSpec}" react react-dom`, { cwd: TEMP, stdio: 'pipe' });
+  // esbuild 是 test 8 (bundle size budget) 用的；裝在 temp 保持 smoke 獨立性
+  execSync(`npm i "${installSpec}" react react-dom esbuild`, { cwd: TEMP, stdio: 'pipe' });
 
   const tempRequire = createRequire(join(TEMP, 'package.json'));
   const installedPkg = tempRequire('@play-kit/games/package.json');
@@ -211,6 +212,96 @@ process.stdout.write(html);
       html.includes('幸運轉盤') || html.includes('Lucky Wheel'),
       'missing i18n title (zh-TW/en)',
     );
+  });
+
+  // ----- 7. Sub-path imports — 17 款 game / core / i18n 都各自能 require -----
+  await check('7. Sub-path imports — all 17 games + core + i18n resolvable', () => {
+    const subpaths = [
+      ['./core', 'useGameScale'],
+      ['./i18n', 'PlayKitProvider'],
+      ['./daily-checkin', 'DailyCheckin'],
+      ['./doll-machine', 'DollMachine'],
+      ['./flip-match', 'FlipMatch'],
+      ['./gift-box', 'GiftBox'],
+      ['./gift-rain', 'GiftRain'],
+      ['./guess-gift', 'GuessGift'],
+      ['./lotto-roll', 'LottoRoll'],
+      ['./lucky-wheel', 'LuckyWheel'],
+      ['./marquee', 'Marquee'],
+      ['./nine-grid', 'NineGrid'],
+      ['./quiz', 'Quiz'],
+      ['./ring-toss', 'RingToss'],
+      ['./scratch-card', 'ScratchCard'],
+      ['./shake', 'Shake'],
+      ['./shake-dice', 'ShakeDice'],
+      ['./slot-machine', 'SlotMachine'],
+      ['./smash-egg', 'SmashEgg'],
+    ];
+    for (const [sub, expected] of subpaths) {
+      const mod = tempRequire(`@play-kit/games${sub.slice(1)}`);
+      assert(
+        mod[expected] !== undefined,
+        `@play-kit/games${sub.slice(1)} missing export "${expected}" (got: ${Object.keys(mod).join(',')})`,
+      );
+    }
+  });
+
+  // ----- 8. Bundle size budget — tree-shake regression guard -----
+  // 8.1 sub-path 只引一款 game 應在 6 KB gzip 內
+  // 8.2 main barrel 只引一款 game 也該 tree-shake 到接近一樣（rollup multi-entry 副作用）
+  // 8.3 全 17 款 main barrel 設上限避免 size creep
+  const sizeProbeCode = `
+import { build } from 'esbuild';
+import { writeFileSync, readFileSync, statSync } from 'node:fs';
+import { gzipSync } from 'node:zlib';
+const cases = [
+  ['only-LuckyWheel-subpath', "import { LuckyWheel } from '@play-kit/games/lucky-wheel'; export default LuckyWheel;"],
+  ['only-LuckyWheel-barrel',  "import { LuckyWheel } from '@play-kit/games'; export default LuckyWheel;"],
+  ['all-17-barrel',           "import * as m from '@play-kit/games'; export default m;"],
+];
+const out = {};
+for (const [label, code] of cases) {
+  writeFileSync('${TEMP}/_bundle_entry.tsx', code);
+  await build({
+    entryPoints: ['${TEMP}/_bundle_entry.tsx'],
+    bundle: true, minify: true, format: 'esm', platform: 'browser',
+    outfile: '${TEMP}/_bundle_out.js',
+    external: ['react', 'react-dom', 'react/jsx-runtime'],
+    treeShaking: true, legalComments: 'none',
+  });
+  out[label] = {
+    raw: statSync('${TEMP}/_bundle_out.js').size,
+    gzip: gzipSync(readFileSync('${TEMP}/_bundle_out.js')).length,
+  };
+}
+process.stdout.write(JSON.stringify(out));
+`;
+  const sizeOut = spawnSync('node', ['--input-type=module', '-e', sizeProbeCode], {
+    cwd: TEMP,
+    encoding: 'utf8',
+  });
+  await check('8. Bundle size budget — tree-shake guard', () => {
+    assert(
+      sizeOut.status === 0,
+      `size probe exit ${sizeOut.status}: ${sizeOut.stderr.slice(0, 400)}`,
+    );
+    const sizes = JSON.parse(sizeOut.stdout);
+    // 預算（gzip）：實測 0.3.0 為 4.78 / 4.79 / 23.84 KB；放 25% buffer
+    const budgets = {
+      'only-LuckyWheel-subpath': 6 * 1024,
+      'only-LuckyWheel-barrel': 6 * 1024,
+      'all-17-barrel': 30 * 1024,
+    };
+    for (const [label, { raw, gzip }] of Object.entries(sizes)) {
+      const limit = budgets[label];
+      const rawKb = (raw / 1024).toFixed(2);
+      const gzKb = (gzip / 1024).toFixed(2);
+      const limitKb = (limit / 1024).toFixed(0);
+      console.log(
+        `      ${label.padEnd(28)} raw ${rawKb} KB · gzip ${gzKb} KB (budget ≤ ${limitKb} KB gzip)`,
+      );
+      assert(gzip <= limit, `${label}: ${gzKb} KB gzip > budget ${limitKb} KB`);
+    }
   });
 } finally {
   try {

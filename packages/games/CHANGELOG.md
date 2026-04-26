@@ -1,30 +1,71 @@
 # @play-kit/games
 
-## 0.2.2
+## 0.3.0
 
-### Patch Changes
+### Minor Changes
 
-- **docs/types: consumer DX 修補（無 runtime 行為改變）**
+- **🎯 Tree-shaking 解放：sub-path imports + multi-entry build**
 
-  從 consumer 角度做完整 e2e DX review 後找到的 3 個 paper cut，全部是 docs/types 層級，consumer 無感升級即可拿到改進。
+  從 0.2.x 的「只用 1 款 game = 70.95 KB raw」打到「**11.43 KB raw / 4.83 KB gzip**」（-84%）。Bundler 終於能精準切分。
 
-  ### Fixed
+  ### 新 API：sub-path imports
 
-  - **`@play-kit/games/styles.css` 缺 type declaration**（TS strict 模式下 `import '@play-kit/games/styles.css'` 會 TS2882 "Cannot find module"）
-    - 新增 `dist/styles.css.d.ts`（空 module declaration）
-    - `exports['./styles.css']` 改為 `{ types, default }` 條件式，TS bundler/node resolution 都能找到
-  - **README events 對照表 17 款裡 12 款不準**（按 README 抄會 tsc fail）
-    - 改寫整張表，每款獨立列出實際簽章（以 `*Props` interface 為準）
-    - 標記 LuckyWheel 用 `LuckyWheelPrize`、NineGrid 用 `NineGridCell`、Marquee 用 `MarqueePrize`、SlotMachine 用 `symbols: number[]`、LottoRoll 用 `numbers: number[]`、ShakeDice 用 `(faces, sum)`、Quiz 只有 `score`（total 在 `onEnd`）、ScratchCard 沒有 `onWin`（用 `onReveal`）等正確簽章
-  - **README 缺非 bundler 環境的 CSS import 指引**
-    - 新增「測試環境（非 bundler runtime）」一節，說明 Vitest `css: true`、Jest `moduleNameMapper`、與「把 CSS import 抽到 app entry」三條解法
-    - Tsx / ts-node / Vitest 預設 / Jest 預設 import `@play-kit/games/styles.css` 會 `ERR_UNKNOWN_FILE_EXTENSION`，這個是 React library 共通限制，但 README 沒寫 → consumer 第一次踩會懵
+  ```tsx
+  // 推薦（v0.3.0+）：sub-path import
+  import { LuckyWheel } from '@play-kit/games/lucky-wheel';
+  import { PlayKitProvider } from '@play-kit/games/i18n';
+  import { useGameScale } from '@play-kit/games/core';
+  ```
 
-  ### Verification
+  17 款 game 各自有 sub-path（`@play-kit/games/<id>`），`/core` 是 hooks + utilities，`/i18n` 是 PlayKitProvider + dictionary。Sub-path 路徑對應 game id（kebab-case），跟 docs site URL 一致。
 
-  - 在乾淨 consumer project（`/tmp/pk-smoke`）裡 README quickstart 範例 strict TS `tsc --noEmit` 通過、不需 ambient `declare module`
-  - 17 款 onWin/onClaim 簽章 README 與 d.ts 1:1 對齊
-  - smoke-published.mjs 6/6 pass
+  ### 舊用法 0 改動受益
+
+  ```tsx
+  // 既有 v0.1 / v0.2 寫法繼續 work
+  import { LuckyWheel, PlayKitProvider } from '@play-kit/games';
+  ```
+
+  Multi-entry build 的副作用：main barrel 也能精準 tree-shake，0.1/0.2 用戶升級不改 import 也能拿到一樣的 bundle 縮減。
+
+  ### Bundle size 實測（esbuild minify + gzip，external react）
+
+  | 用法 | 0.2.x | 0.3.0 | 改善 |
+  |---|---|---|---|
+  | 只用 LuckyWheel | 70.95 KB | **11.43 KB** | -84% |
+  | 2 款 game | ~71 KB | 17.25 KB | -76% |
+  | 全 17 款 | 76.21 KB | 79.90 KB | 持平（含完整 17 款） |
+
+  ### Internal changes
+
+  - `vite.config.ts` 從單 entry 改 19 entry（main + core + i18n + 17 games），rollup 自動切 shared chunks
+  - `package.json` exports map 加 19 條 sub-path（每條帶 types/import/require 條件）
+  - `dts` plugin 改 `rollupTypes: false`：每個 sub-path 自家 d.ts 維持 source 1:1（IDE go-to-definition 跳到聚焦的小檔，比單檔 924 行的 rolled-up 體驗更好）
+  - 移除 `tsc --emitDeclarationOnly` 步驟（vite-plugin-dts 已經會 emit；雙跑會產生 152 個冗餘 d.ts）
+
+  ### CI: bundle size budget 鎖死
+
+  `pnpm smoke:published` 從 6 個檢查擴成 8 個：
+  - **新 #7**：17 款 game + core + i18n 所有 sub-path import 可解析
+  - **新 #8**：bundle size 預算（only-LuckyWheel ≤ 6 KB gzip、全 17 款 ≤ 30 KB gzip），超標 CI 直接 fail，杜絕未來 size creep
+
+  ---
+
+  ### 同梱（從未發佈的 0.2.2 整合進來）
+
+  - **`@play-kit/games/styles.css` 缺 type declaration**：build 後產 `dist/styles.css.d.ts`，consumer 不需自加 ambient module
+  - **README events 對照表 17 款裡 12 款不準**：改寫整張表，每款獨立列出（LuckyWheel 用 `LuckyWheelPrize`、SlotMachine 用 `symbols: number[]`、ShakeDice 用 `(faces, sum)` 等）
+  - **README 缺非 bundler runtime 的 CSS import 指引**：新增「測試環境（非 bundler runtime）」一節
+
+  ---
+
+  ### Migration v0.2.x → v0.3.0
+
+  完全相容，無 breaking change。可選的升級動作：
+
+  - 想拿到 sub-path import 的明確意圖：把 `from '@play-kit/games'` 改成 `from '@play-kit/games/<game-id>'`（如 `lucky-wheel`）
+  - 想用 hooks 但不引 game：`from '@play-kit/games/core'`
+  - 想用 Provider 但不引 game：`from '@play-kit/games/i18n'`
 
 ## 0.2.1
 
