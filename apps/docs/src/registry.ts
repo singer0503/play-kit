@@ -368,12 +368,17 @@ export const registry: GameMeta[] = [
       en: 'Customisable wheel with server-authoritative prizeIndex, controlled state and remaining, full event callbacks, and a ref API.',
     },
     install: 'pnpm add @play-kit/games',
-    basicUsage: `import { LuckyWheel, PlayKitProvider } from '@play-kit/games';
+    basicUsage: `// v0.3.0+ 推薦：sub-path import，bundler 只把這款 game 拉進去（gzip ~5 KB）
+import { LuckyWheel } from '@play-kit/games/lucky-wheel';
+import { PlayKitProvider } from '@play-kit/games/i18n';
 import '@play-kit/games/styles.css';
 
 <PlayKitProvider lang="zh-TW">
   <LuckyWheel prizes={prizes} maxPlays={3} onEnd={(p, i) => {}} />
-</PlayKitProvider>`,
+</PlayKitProvider>
+
+// 也支援舊寫法（main barrel 也會 tree-shake，舊用戶 0 改動受益）
+// import { LuckyWheel, PlayKitProvider } from '@play-kit/games';`,
     knobs: [
       { prop: 'maxPlays', type: 'number', min: 1, max: 10, default: 3 },
       {
