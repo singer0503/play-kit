@@ -1,0 +1,33 @@
+{
+  "name": "play-kit",
+  "version": "0.0.0",
+  "private": true,
+  "description": "React mini-game kit monorepo root",
+  "packageManager": "pnpm@10.17.0",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "dev": "pnpm -C apps/docs dev",
+    "build": "pnpm -r --filter '@play-kit/*' build && pnpm -C apps/docs build",
+    "build:lib": "pnpm -C packages/games build",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "check:docs": "pnpm -C packages/games check:docs",
+    "check:ssr": "pnpm -C packages/games check:ssr",
+    "changeset": "changeset"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@changesets/cli": "^2.27.9",
+    "@types/node": "^25.6.0",
+    "typescript": "^5.5.4"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["@biomejs/biome", "esbuild"]
+  }
+}

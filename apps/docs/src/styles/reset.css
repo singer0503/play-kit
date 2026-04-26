@@ -1,0 +1,23 @@
+/* Docs site reset — M4 會補完整的 design token 整合。 */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+body {
+  background: #0d0d13;
+  color: #e9e9f1;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+:root[data-theme="light"] body {
+  background: #fafaf7;
+  color: #101018;
+}

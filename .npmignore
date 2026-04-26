@@ -1,0 +1,93 @@
+# ──────────────────────────────────────────────────────────────────
+# .npmignore at repo root
+#
+# 此檔案是「萬一您從 monorepo 根目錄 npm publish」的最後防線。
+# 正常發佈一律：cd packages/games && npm publish
+# packages/games/package.json 有 "files" 白名單只發 dist/ + README + CHANGELOG，
+# 那條才是真正的 publish 來源。本檔案是雙保險。
+#
+# 結尾的 `*` 表示「任何沒被白名單救回來的全部 ignore」。
+# 如果哪天真的需要從 root 發包，要修這檔加白名單，會逼出明確思考。
+# ──────────────────────────────────────────────────────────────────
+
+# ── 顯式列出絕對不可外流的高敏感目錄 ──
+.claude/
+.cursor/
+.vscode/
+.idea/
+.github/
+.husky/
+.changeset/
+.git/
+.gitignore
+
+# ── 本機設定 / secrets ──
+.env
+.env.*
+*.local
+*.local.*
+secrets/
+credentials/
+*.pem
+*.key
+*.crt
+
+# ── deploy infra（含 server 路徑、可能含 IP）──
+deploy/
+scripts/
+
+# ── workspace / app 原始碼（不該以 monorepo 形式打包）──
+packages/
+apps/
+src/
+
+# ── docs / 設計稿 / legacy playground ──
+uploads/
+design-canvas.jsx
+"Style Directions.html"
+index.html
+CLAUDE.md
+MIGRATION.md
+CONTRIBUTING.md
+
+# ── 開發配置 ──
+biome.json
+vitest.config.ts
+tsconfig*.json
+pnpm-workspace.yaml
+pnpm-lock.yaml
+.editorconfig
+.prettierrc*
+.eslintrc*
+.npmrc
+
+# ── 建置 / 測試產物 ──
+dist/
+build/
+out/
+coverage/
+.next/
+.turbo/
+.vite/
+node_modules/
+
+# ── log / 暫存 ──
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+._*
+*.swp
+*.tmp
+tmp/
+temp/
+
+# ── 雙保險：以上沒列到的全部一刀切 ──
+# 這條放最後，等於「除非上方有 ! 白名單，否則都不發」。
+# 若日後真要從 root 發包，請在這條前面加：
+#   !README.md
+#   !LICENSE
+#   !package.json
+# 等明確白名單。
+*

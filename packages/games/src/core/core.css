@@ -1,0 +1,291 @@
+/* ============================================================
+   Library core 共用視覺 primitives
+   - StateBadge / Confetti（元件樣式）
+   - plate（機身外框，金色 / 一般）
+   - bulb（金色跑馬燈燈泡）
+   - btn（主要 / 幽靈按鈕）
+   - g-cta / g-meta（各 game 底部按鈕區、狀態列）
+   - 共用 keyframes：pulse / shake-wiggle / glow-pulse / fall
+   各 game 的專屬 CSS 放在自己目錄內。
+   ============================================================ */
+
+.pk-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- StateBadge ---------- */
+.pk-state-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 4px 10px;
+  border-radius: var(--pk-r-pill);
+  font: 500 12px / 1 var(--pk-font-sans);
+  letter-spacing: 0.02em;
+  background: var(--pk-bg-2);
+  color: var(--pk-fg-1);
+  border: 1px solid var(--pk-border);
+  white-space: nowrap;
+}
+.pk-state-badge__glyph {
+  display: inline-flex;
+  width: 1em;
+  font-family: var(--pk-font-mono);
+}
+.pk-state-badge--won {
+  background: color-mix(in oklch, var(--pk-win) 18%, transparent);
+  color: var(--pk-win);
+  border-color: color-mix(in oklch, var(--pk-win) 40%, transparent);
+}
+.pk-state-badge--lost {
+  color: var(--pk-lose);
+  border-color: color-mix(in oklch, var(--pk-lose) 50%, transparent);
+}
+.pk-state-badge--claimed {
+  background: color-mix(in oklch, var(--pk-accent) 12%, transparent);
+  color: var(--pk-accent);
+  border-color: color-mix(in oklch, var(--pk-accent) 40%, transparent);
+}
+.pk-state-badge--playing {
+  color: var(--pk-fg-0);
+  border-color: var(--pk-border-strong);
+}
+.pk-state-badge--cooldown {
+  color: var(--pk-fg-2);
+  opacity: 0.75;
+}
+
+/* ---------- Confetti ----------
+   說明：
+   - 自帶 `contain: layout paint size style` + `container-type: size`，邊界與度量皆獨立
+   - 紙片落距以 `cqh`（container-relative）為準，**不再依賴 `vh`**
+   - 若父層非 positioned ancestor，下面的 `.pk-game-root` 規則也會補 `position: relative`
+*/
+.pk-confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 10;
+  contain: layout paint size style;
+  container-type: size;
+}
+.pk-confetti__piece {
+  position: absolute;
+  top: 0;
+  width: 8px;
+  height: 14px;
+  border-radius: 2px;
+  animation: pk-confetti-fall linear forwards;
+}
+@keyframes pk-confetti-fall {
+  0% {
+    transform: translateY(-10cqh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(110cqh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+/* ---------- Game root：所有 game 根 <section> 的共同定位 context ----------
+   `.pk-game` 由每個 game 根 section 自帶（與 BEM class 並列），
+   保證 `.pk-confetti` / `.pk-flash` 等 absolute overlay 永遠錨定在本遊戲盒。
+*/
+.pk-game {
+  position: relative;
+  isolation: isolate;
+}
+
+/* ---------- Plate（機身外框，所有 game 的 chassis 可直接套用） ---------- */
+.pk-plate {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--pk-bg-2) 70%, white 2%),
+    var(--pk-bg-2) 40%,
+    color-mix(in oklch, var(--pk-bg-2) 80%, black 5%)
+  );
+  border: 1px solid var(--pk-border-strong);
+  border-radius: var(--pk-r-xl);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), inset 0 -1px 0 rgba(0, 0, 0, 0.25),
+    var(--pk-shadow-lg);
+  position: relative;
+}
+.pk-plate--gold {
+  border-color: color-mix(in oklch, var(--pk-accent) 45%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 -1px 0 rgba(0, 0, 0, 0.3), inset 0 0
+    0 1px color-mix(in oklch, var(--pk-accent) 30%, transparent), var(--pk-shadow-lg);
+}
+
+/* ---------- Bulb（金色 halo 燈泡：LuckyWheel / SlotMachine / NineGrid） ---------- */
+.pk-bulb {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 30% 30%,
+    var(--pk-accent),
+    color-mix(in oklch, var(--pk-accent) 70%, black)
+  );
+  box-shadow: 0 0 10px var(--pk-accent), inset 0 -1px 2px rgba(0, 0, 0, 0.3);
+}
+.pk-bulb--off {
+  background: radial-gradient(circle at 30% 30%, var(--pk-bg-2), var(--pk-bg-ink));
+  box-shadow: inset 0 -1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* ---------- Btn（主要 / 幽靈按鈕） ---------- */
+.pk-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border-radius: var(--pk-r-md);
+  font: 600 13.5px / 1 var(--pk-font-sans);
+  letter-spacing: 0.01em;
+  border: 1px solid transparent;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  transition: transform var(--pk-duration-fast) ease, filter var(--pk-duration-fast) ease;
+  position: relative;
+}
+.pk-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+.pk-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+.pk-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.pk-btn:focus-visible {
+  outline: 2px solid var(--pk-accent-2);
+  outline-offset: 2px;
+}
+.pk-btn--primary {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--pk-accent) 95%, white),
+    var(--pk-accent)
+  );
+  color: var(--pk-accent-fg);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1px 0 rgba(0, 0, 0, 0.15), 0 6px 18px
+    -6px color-mix(in oklch, var(--pk-accent) 60%, transparent);
+}
+.pk-btn--primary:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+.pk-btn--ghost {
+  background: var(--pk-bg-1);
+  color: var(--pk-fg-0);
+  border-color: var(--pk-border-strong);
+}
+.pk-btn--ghost:hover:not(:disabled) {
+  background: var(--pk-bg-2);
+  border-color: var(--pk-accent);
+}
+.pk-btn--sm {
+  padding: 7px 14px;
+  font-size: 12px;
+}
+
+/* ---------- 共用 layout：game wrapper / meta / cta ---------- */
+.pk-g-wrap {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+}
+.pk-g-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  font: 500 11px / 1 var(--pk-font-mono);
+  color: var(--pk-fg-2);
+  letter-spacing: 0.04em;
+}
+.pk-g-meta b {
+  color: var(--pk-accent);
+  font-weight: 700;
+}
+.pk-g-cta {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  min-height: 44px;
+}
+
+/* ---------- 共用動畫 ---------- */
+@keyframes pk-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.04);
+  }
+}
+@keyframes pk-shake-wiggle {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-3px, -2px) rotate(-3deg);
+  }
+  75% {
+    transform: translate(3px, 2px) rotate(3deg);
+  }
+}
+@keyframes pk-shake-wild {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0);
+  }
+  25% {
+    transform: translate(-5px, -3px) rotate(-2deg);
+  }
+  50% {
+    transform: translate(4px, 2px) rotate(1deg);
+  }
+  75% {
+    transform: translate(-2px, 3px) rotate(-1deg);
+  }
+}
+@keyframes pk-glow-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 16px color-mix(in oklch, var(--pk-accent) 40%, transparent), 0 0 32px
+      color-mix(in oklch, var(--pk-accent) 20%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 28px color-mix(in oklch, var(--pk-accent) 70%, transparent), 0 0 56px
+      color-mix(in oklch, var(--pk-accent) 35%, transparent);
+  }
+}
+
+/* prefers-reduced-motion：停用 confetti / pulse / shake 等連續動畫 */
+@media (prefers-reduced-motion: reduce) {
+  .pk-confetti__piece {
+    animation: none;
+    display: none;
+  }
+}

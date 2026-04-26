@@ -1,0 +1,110 @@
+.pk-sd {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 16px;
+}
+.pk-sd__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  width: 360px;
+  font: 500 13px / 1 var(--pk-font-sans);
+  color: var(--pk-fg-1);
+}
+.pk-sd__stage {
+  width: 360px;
+  padding: 26px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  align-items: center;
+  background: var(--pk-bg-1);
+  border: 1px solid var(--pk-border);
+  border-radius: var(--pk-r-lg);
+  box-shadow: var(--pk-shadow-md);
+}
+.pk-sd__cup {
+  width: 100%;
+  background: var(--pk-bg-ink);
+  border: 1px solid var(--pk-border);
+  border-radius: var(--pk-r-md);
+  padding: 22px;
+}
+.pk-sd__cup--shaking {
+  animation: pk-sd-wiggle 0.3s infinite;
+}
+@keyframes pk-sd-wiggle {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0);
+  }
+  25% {
+    transform: translate(-5px, -3px) rotate(-2deg);
+  }
+  50% {
+    transform: translate(4px, 2px) rotate(1deg);
+  }
+  75% {
+    transform: translate(-2px, 3px) rotate(-1deg);
+  }
+}
+.pk-sd__row {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+}
+.pk-sd__die {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, oklch(0.98 0.02 85), oklch(0.85 0.03 85));
+  border: 1px solid oklch(0.55 0.05 85);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  padding: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+.pk-sd__pip {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: oklch(0.18 0.02 285);
+  align-self: center;
+  justify-self: center;
+}
+.pk-sd__pip--hidden {
+  visibility: hidden;
+}
+.pk-sd__readout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.pk-sd__label {
+  font: 500 10px / 1 var(--pk-font-mono);
+  color: var(--pk-fg-2);
+  letter-spacing: 0.2em;
+}
+.pk-sd__sum {
+  font: 700 48px / 1 var(--pk-font-display);
+  color: var(--pk-fg-0);
+}
+.pk-sd__sum--win {
+  color: var(--pk-accent);
+  text-shadow: 0 0 16px color-mix(in oklch, var(--pk-accent) 60%, transparent);
+}
+.pk-sd__cta {
+  display: flex;
+  gap: 12px;
+  min-height: 44px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pk-sd__cup,
+  .pk-sd__cup--shaking {
+    animation: none;
+  }
+}

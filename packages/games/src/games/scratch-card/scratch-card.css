@@ -1,0 +1,114 @@
+.pk-sc {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 16px;
+  width: 100%;
+  max-width: 380px;
+}
+.pk-sc__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 320px;
+  font: 500 12px / 1 var(--pk-font-mono);
+  color: var(--pk-fg-2);
+  letter-spacing: 0.04em;
+}
+.pk-sc__meta b {
+  color: var(--pk-accent);
+  font-weight: 700;
+}
+
+.pk-sc__card {
+  position: relative;
+  width: 320px;
+  height: 180px;
+  border-radius: var(--pk-r-lg);
+  overflow: hidden;
+  box-shadow: var(--pk-shadow-lg), 0 0 0 2px color-mix(in oklch, var(--pk-accent) 40%, transparent),
+    0 0 0 5px var(--pk-bg-0);
+}
+
+.pk-sc__result {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+.pk-sc__result--win {
+  background: radial-gradient(circle at 50% 30%, oklch(0.75 0.14 82), oklch(0.48 0.14 75) 80%),
+    oklch(0.55 0.14 75);
+}
+.pk-sc__result--lose {
+  background: radial-gradient(circle at 50% 30%, oklch(0.42 0.04 290), oklch(0.22 0.04 290));
+  color: oklch(0.78 0.03 285);
+}
+.pk-sc__corner {
+  position: absolute;
+  font: 500 14px / 1 var(--pk-font-display);
+  color: oklch(0.28 0.08 60);
+}
+.pk-sc__result--lose .pk-sc__corner {
+  color: oklch(0.48 0.04 290);
+}
+.pk-sc__corner--tl {
+  top: 8px;
+  left: 10px;
+}
+.pk-sc__corner--tr {
+  top: 8px;
+  right: 10px;
+}
+.pk-sc__corner--bl {
+  bottom: 8px;
+  left: 10px;
+}
+.pk-sc__corner--br {
+  bottom: 8px;
+  right: 10px;
+}
+
+.pk-sc__ribbon {
+  font: 700 10px / 1 var(--pk-font-mono);
+  letter-spacing: 0.3em;
+  padding: 3px 14px;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  margin-bottom: 6px;
+  color: oklch(0.22 0.05 60);
+}
+.pk-sc__amount {
+  font: 700 48px / 1 var(--pk-font-display);
+  letter-spacing: -0.02em;
+  color: oklch(0.15 0.03 60);
+  text-shadow: 0 2px 0 rgba(255, 255, 255, 0.2);
+}
+.pk-sc__amount--miss {
+  font-size: 24px;
+  color: inherit;
+}
+.pk-sc__sub {
+  font: 500 11px / 1 var(--pk-font-mono);
+  letter-spacing: 0.2em;
+  opacity: 0.85;
+  margin-top: 6px;
+  text-transform: uppercase;
+}
+
+.pk-sc__canvas {
+  position: absolute;
+  inset: 0;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.pk-sc__cta {
+  display: flex;
+  gap: 12px;
+  min-height: 44px;
+}

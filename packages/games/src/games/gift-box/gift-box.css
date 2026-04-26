@@ -1,0 +1,160 @@
+.pk-gb {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 16px;
+  width: 100%;
+  max-width: 420px;
+}
+.pk-gb__meta {
+  font: 500 12px / 1 var(--pk-font-mono);
+  color: var(--pk-fg-2);
+  letter-spacing: 0.04em;
+}
+.pk-gb__row {
+  display: flex;
+  gap: 14px;
+  padding: 20px 0;
+}
+.pk-gb__box {
+  position: relative;
+  width: 72px;
+  height: 88px;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  transition: transform var(--pk-duration-fast) ease;
+}
+.pk-gb__box:hover:not(:disabled):not(.pk-gb__box--dim) {
+  transform: translateY(-6px);
+}
+.pk-gb__box:disabled,
+.pk-gb__box--dim {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.pk-gb__box--picked {
+  transform: translateY(-10px);
+}
+.pk-gb__box:focus-visible {
+  outline: 2px solid var(--pk-accent);
+  outline-offset: 4px;
+  border-radius: var(--pk-r-sm);
+}
+
+/* 盒身 */
+.pk-gb__body {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 50px;
+  background: linear-gradient(180deg, oklch(0.62 0.2 25), oklch(0.48 0.18 22));
+  border-radius: 4px 4px 6px 6px;
+  border: 1px solid oklch(0.38 0.15 22);
+  box-shadow: inset 0 -2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* 金色緞帶（水平 + 垂直） */
+.pk-gb__ribbon-v {
+  position: absolute;
+  left: 50%;
+  top: -2px;
+  width: 8px;
+  height: 90px;
+  background: oklch(0.92 0.08 82);
+  transform: translateX(-50%);
+  box-shadow: 0 0 8px oklch(0.82 0.14 82 / 0.6);
+  z-index: 1;
+}
+.pk-gb__ribbon-h {
+  position: absolute;
+  left: -2px;
+  top: 14px;
+  width: calc(100% + 4px);
+  height: 6px;
+  background: oklch(0.92 0.08 82);
+  z-index: 1;
+}
+
+/* 上蓋（打開動畫） */
+.pk-gb__lid {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 34px;
+  background: linear-gradient(180deg, oklch(0.72 0.22 25), oklch(0.55 0.2 22));
+  border-radius: 4px 4px 2px 2px;
+  border: 1px solid oklch(0.45 0.18 22);
+  transition: transform 0.5s cubic-bezier(0.3, 1.5, 0.4, 1), opacity 0.3s ease;
+  transform-origin: bottom center;
+  z-index: 2;
+}
+.pk-gb__box--open .pk-gb__lid {
+  transform: translateY(-40px) rotate(-25deg);
+  opacity: 0.6;
+}
+.pk-gb__bow {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 22px;
+  filter: drop-shadow(0 0 4px oklch(0.82 0.14 82 / 0.5));
+}
+
+/* 獎品揭露（打開後顯示） */
+.pk-gb__reveal {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.4s 0.3s;
+  pointer-events: none;
+  z-index: 3;
+}
+.pk-gb__box--open .pk-gb__reveal {
+  opacity: 1;
+}
+.pk-gb__box--open .pk-gb__reveal::before {
+  content: "";
+  position: absolute;
+  inset: -20px;
+  background: radial-gradient(circle, var(--pk-accent), transparent 60%);
+  opacity: 0.5;
+  z-index: -1;
+  animation: pk-pulse 1.2s infinite;
+}
+.pk-gb__prize {
+  font: 700 14px / 1 var(--pk-font-display);
+  color: var(--pk-accent);
+  background: var(--pk-bg-ink);
+  padding: 4px 8px;
+  border: 1px solid var(--pk-accent);
+  border-radius: var(--pk-r-sm);
+  text-shadow: 0 0 8px color-mix(in oklch, var(--pk-accent) 50%, transparent);
+}
+.pk-gb__prize--miss {
+  color: var(--pk-fg-2);
+  border-color: var(--pk-border);
+  font-weight: 500;
+  font-size: 11px;
+  text-shadow: none;
+}
+.pk-gb__cta {
+  display: flex;
+  gap: 12px;
+  min-height: 44px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pk-gb__box,
+  .pk-gb__lid,
+  .pk-gb__reveal {
+    transition: none;
+    animation: none;
+  }
+}

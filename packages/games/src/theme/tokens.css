@@ -1,0 +1,135 @@
+/* ============================================================
+   @play-kit/games — Design token layer（4 theme）
+   由 <html data-theme="..."> 或任意祖先 [data-theme] 切換。
+   Game component 僅消費 CSS variables，不重新宣告顏色。
+   ============================================================ */
+
+:root {
+  --pk-font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "PingFang TC", "Noto Sans TC",
+    sans-serif;
+  --pk-font-display: "Space Grotesk", "Inter", sans-serif;
+  --pk-font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --pk-r-xs: 6px;
+  --pk-r-sm: 10px;
+  --pk-r-md: 14px;
+  --pk-r-lg: 20px;
+  --pk-r-xl: 28px;
+  --pk-r-pill: 999px;
+
+  --pk-shadow-sm: 0 1px 0 rgba(255, 255, 255, 0.04), 0 1px 2px rgba(0, 0, 0, 0.4);
+  --pk-shadow-md: 0 18px 40px -18px rgba(0, 0, 0, 0.55), 0 1px 0 rgba(255, 255, 255, 0.04);
+  --pk-shadow-lg: 0 40px 80px -28px rgba(0, 0, 0, 0.7), 0 1px 0 rgba(255, 255, 255, 0.05);
+
+  --pk-duration-fast: 150ms;
+  --pk-duration-med: 280ms;
+  --pk-duration-slow: 600ms;
+  --pk-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --pk-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* ------------- NOCTURNE (default) ------------- */
+[data-theme="nocturne"],
+[data-theme="dark"],
+:root:not([data-theme]) {
+  --pk-bg-0: oklch(0.14 0.03 285);
+  --pk-bg-1: oklch(0.18 0.035 288);
+  --pk-bg-2: oklch(0.22 0.04 290);
+  --pk-bg-ink: oklch(0.1 0.025 285);
+
+  --pk-fg-0: oklch(0.97 0.01 90);
+  --pk-fg-1: oklch(0.82 0.025 90);
+  --pk-fg-2: oklch(0.6 0.025 285);
+
+  --pk-border: oklch(0.3 0.04 290 / 0.55);
+  --pk-border-strong: oklch(0.42 0.06 290);
+
+  --pk-accent: oklch(0.82 0.14 82);
+  --pk-accent-2: oklch(0.72 0.22 25);
+  --pk-accent-3: oklch(0.72 0.22 305);
+  --pk-accent-fg: oklch(0.16 0.03 60);
+
+  --pk-win: oklch(0.82 0.14 82);
+  --pk-lose: oklch(0.58 0.06 290);
+
+  color-scheme: dark;
+}
+
+/* ------------- LIGHT ------------- */
+[data-theme="light"] {
+  --pk-bg-0: oklch(0.97 0.008 85);
+  --pk-bg-1: oklch(0.94 0.012 82);
+  --pk-bg-2: oklch(0.9 0.018 80);
+  --pk-bg-ink: oklch(0.92 0.015 82);
+
+  --pk-fg-0: oklch(0.2 0.035 290);
+  --pk-fg-1: oklch(0.32 0.035 290);
+  --pk-fg-2: oklch(0.48 0.03 290);
+
+  --pk-border: oklch(0.82 0.02 80);
+  --pk-border-strong: oklch(0.7 0.03 78);
+
+  --pk-accent: oklch(0.58 0.16 68);
+  --pk-accent-2: oklch(0.55 0.2 22);
+  --pk-accent-3: oklch(0.5 0.22 310);
+  --pk-accent-fg: oklch(0.98 0.01 90);
+
+  --pk-win: oklch(0.58 0.16 68);
+  --pk-lose: oklch(0.52 0.04 290);
+
+  color-scheme: light;
+}
+
+/* ------------- NEON ------------- */
+[data-theme="neon"] {
+  --pk-font-display: "VT323", "JetBrains Mono", monospace;
+
+  --pk-bg-0: oklch(0.08 0.01 280);
+  --pk-bg-1: oklch(0.11 0.015 285);
+  --pk-bg-2: oklch(0.16 0.02 290);
+  --pk-bg-ink: oklch(0.05 0.01 280);
+
+  --pk-fg-0: oklch(0.97 0.02 200);
+  --pk-fg-1: oklch(0.86 0.03 200);
+  --pk-fg-2: oklch(0.6 0.04 290);
+
+  --pk-border: oklch(0.72 0.28 340 / 0.35);
+  --pk-border-strong: oklch(0.72 0.28 340);
+
+  --pk-accent: oklch(0.72 0.28 340);
+  --pk-accent-2: oklch(0.82 0.19 195);
+  --pk-accent-3: oklch(0.78 0.2 125);
+  --pk-accent-fg: oklch(0.08 0.01 280);
+
+  --pk-win: oklch(0.78 0.2 125);
+  --pk-lose: oklch(0.55 0.04 290);
+
+  color-scheme: dark;
+}
+
+/* ------------- HOLO ------------- */
+[data-theme="holo"] {
+  --pk-font-display: "Playfair Display", "Space Grotesk", serif;
+
+  --pk-bg-0: oklch(0.14 0.05 300);
+  --pk-bg-1: oklch(0.18 0.06 305 / 0.7);
+  --pk-bg-2: oklch(0.24 0.07 310 / 0.6);
+  --pk-bg-ink: oklch(0.1 0.04 300);
+
+  --pk-fg-0: oklch(0.98 0.01 310);
+  --pk-fg-1: oklch(0.86 0.03 310);
+  --pk-fg-2: oklch(0.66 0.04 310);
+
+  --pk-border: oklch(0.98 0.01 310 / 0.12);
+  --pk-border-strong: oklch(0.98 0.01 310 / 0.22);
+
+  --pk-accent: oklch(0.82 0.13 345);
+  --pk-accent-2: oklch(0.8 0.13 235);
+  --pk-accent-3: oklch(0.8 0.14 300);
+  --pk-accent-fg: oklch(0.18 0.05 300);
+
+  --pk-win: oklch(0.82 0.13 345);
+  --pk-lose: oklch(0.56 0.04 310);
+
+  color-scheme: dark;
+}

@@ -1,0 +1,108 @@
+.pk-ng {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 16px;
+}
+.pk-ng__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  width: 320px;
+  font: 500 13px / 1 var(--pk-font-sans);
+  color: var(--pk-fg-1);
+}
+.pk-ng__meta b {
+  color: var(--pk-accent);
+  font-weight: 700;
+}
+
+.pk-ng__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 96px);
+  grid-template-rows: repeat(3, 96px);
+  gap: 8px;
+  padding: 8px;
+  background: var(--pk-bg-1);
+  border: 1px solid var(--pk-border);
+  border-radius: var(--pk-r-lg);
+  box-shadow: var(--pk-shadow-md);
+}
+
+.pk-ng__cell {
+  background: var(--pk-bg-2);
+  border: 1px solid var(--pk-border);
+  border-radius: var(--pk-r-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: transform var(--pk-duration-fast) ease;
+}
+.pk-ng__cell-icon {
+  font-size: 26px;
+}
+.pk-ng__cell-label {
+  font: 500 10px / 1 var(--pk-font-mono);
+  color: var(--pk-fg-2);
+}
+.pk-ng__cell--active {
+  background: var(--pk-accent);
+  transform: scale(1.06);
+  box-shadow: 0 0 20px color-mix(in oklch, var(--pk-accent) 60%, transparent);
+}
+.pk-ng__cell--active .pk-ng__cell-label {
+  color: var(--pk-accent-fg);
+  font-weight: 600;
+}
+.pk-ng__cell--win {
+  background: var(--pk-win);
+  box-shadow: 0 0 30px color-mix(in oklch, var(--pk-win) 70%, transparent);
+}
+.pk-ng__cell--win .pk-ng__cell-label {
+  color: white;
+  font-weight: 700;
+}
+.pk-ng__cell--lose {
+  opacity: 0.5;
+}
+
+.pk-ng__center {
+  background: linear-gradient(135deg, var(--pk-accent), var(--pk-accent-2));
+  color: var(--pk-accent-fg);
+  border: 0;
+  border-radius: var(--pk-r-md);
+  font: 800 14px / 1 var(--pk-font-display);
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: filter var(--pk-duration-fast) ease;
+}
+.pk-ng__center:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+.pk-ng__center:disabled {
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+.pk-ng__center:focus-visible {
+  outline: 3px solid var(--pk-accent-2);
+  outline-offset: 2px;
+}
+
+.pk-ng__cta {
+  display: flex;
+  gap: 12px;
+  min-height: 44px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pk-ng__cell {
+    transition: none;
+  }
+  .pk-ng__cell--active {
+    transform: none;
+  }
+}

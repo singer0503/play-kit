@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Biome lint (含 a11y rules)
+        run: pnpm biome check .
+
+      - name: Typecheck
+        run: pnpm -r typecheck
+
+      - name: Test + coverage
+        run: pnpm -r test
+
+      - name: Docs drift check
+        run: pnpm check:docs
+
+      - name: SSR safety check
+        run: pnpm check:ssr
+
+      - name: Library build
+        run: pnpm build:lib
+
+      - name: Docs build
+        run: pnpm -C apps/docs build

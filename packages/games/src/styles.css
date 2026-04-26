@@ -1,0 +1,5 @@
+/* @play-kit/games 的 CSS 匯總入口。
+   使用者於 app 根部 `import '@play-kit/games/styles.css'` 即可取得全部樣式。
+   Library build 時由 vite-plugin-lib-inject-css 自動 inject；此檔做為 external 匯入點。 */
+@import "./theme/tokens.css";
+@import "./core/core.css";

@@ -1,0 +1,83 @@
+{
+  "name": "@play-kit/games",
+  "version": "0.1.0",
+  "description": "17 React mini-games (lucky wheel, scratch card, nine-grid, slot machine, ...) with 6-state machines, a11y, SSR-safe, zero non-peer deps.",
+  "keywords": [
+    "react",
+    "games",
+    "mini-game",
+    "lottery",
+    "lucky-wheel",
+    "scratch-card",
+    "slot-machine",
+    "typescript",
+    "a11y",
+    "ssr-safe",
+    "controlled",
+    "forwardRef"
+  ],
+  "homepage": "https://github.com/singer0503/mini-game#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/singer0503/mini-game.git",
+    "directory": "packages/games"
+  },
+  "bugs": {
+    "url": "https://github.com/singer0503/mini-game/issues"
+  },
+  "license": "MIT",
+  "author": "singer0503",
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "sideEffects": ["**/*.css"],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./styles.css": "./dist/styles.css",
+    "./package.json": "./package.json"
+  },
+  "files": ["dist", "README.md", "CHANGELOG.md"],
+  "scripts": {
+    "build": "vite build && tsc --emitDeclarationOnly -p tsconfig.build.json",
+    "dev": "vite build --watch",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage --passWithNoTests",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "check:docs": "tsx ../../scripts/verify-docs.ts",
+    "check:ssr": "node --experimental-loader ./scripts/ssr-loader.mjs --import tsx ./scripts/check-ssr.ts"
+  },
+  "peerDependencies": {
+    "react": ">=18 <20",
+    "react-dom": ">=18 <20"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.5.0",
+    "@testing-library/react": "^16.0.1",
+    "@testing-library/user-event": "^14.5.2",
+    "@types/jest-axe": "^3.5.9",
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.2",
+    "@vitest/coverage-v8": "^2.1.2",
+    "jest-axe": "^9.0.0",
+    "jsdom": "^25.0.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "ts-morph": "^24.0.0",
+    "tsx": "^4.19.1",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.8",
+    "vite-plugin-dts": "^4.2.3",
+    "vite-plugin-lib-inject-css": "^2.1.1",
+    "vitest": "^2.1.2"
+  }
+}

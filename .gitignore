@@ -1,0 +1,23 @@
+node_modules
+dist
+build
+coverage
+.DS_Store
+*.log
+.turbo
+.vite
+.cache
+.vercel
+.env
+.env.local
+.env.*.local
+
+# 本機個人 IDE / agent 設定（不該共享）
+.claude/
+.cursor/
+.idea/
+.vscode/
+
+# 部署密碼 / server 變數（用 env 注入，不入 git）
+.env.deploy
+.env.deploy.local
