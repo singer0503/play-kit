@@ -21,3 +21,8 @@ coverage
 # 部署密碼 / server 變數（用 env 注入，不入 git）
 .env.deploy
 .env.deploy.local
+
+# Playwright artifacts
+test-results/
+playwright-report/
+playwright/.cache/

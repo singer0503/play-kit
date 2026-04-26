@@ -43,6 +43,7 @@ pnpm lint            # 0 error (Biome)
 pnpm -r test         # all pass
 pnpm check:docs      # props drift: 全 games 對齊
 pnpm check:ssr       # SSR import safe
+pnpm e2e:build && pnpm e2e   # Playwright e2e（48 spec / desktop + mobile）
 ```
 
 沒 proof 的 task 一律視為未完成。UI 改動還要手動開 `pnpm dev` 瀏覽器確認（型別對不等於畫面對）。
@@ -87,6 +88,10 @@ mini-game/
 | `pnpm lint` / `pnpm lint:fix` | Biome check / auto-fix |
 | `pnpm check:docs` | registry props metadata vs `*Props` interface drift |
 | `pnpm check:ssr` | `renderToString` 跑每款 game，確認 SSR-safe |
+| `pnpm e2e:build` | 先 build lib + docs（e2e 跑前一次性） |
+| `pnpm e2e` | Playwright e2e 全跑（17 款 smoke + 深度 + mobile drawer / tab 預設） |
+| `pnpm e2e:ui` | Playwright UI 互動模式 debug |
+| `pnpm e2e:report` | 看上次 e2e HTML report |
 | `pnpm changeset` | 新增版本變更紀錄 |
 
 ### 技術棧

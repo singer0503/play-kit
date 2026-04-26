@@ -4,6 +4,23 @@
 
 本專案承諾遵守 [Contributor Covenant 行為準則](./CODE_OF_CONDUCT.md)；發現濫用請回報至 `singer0503@gmail.com`。
 
+## End-to-end 測試（Playwright）
+
+```bash
+pnpm e2e:build    # 先 build lib + docs（一次性）
+pnpm e2e          # 跑全部 spec（48 個，桌機 + iPhone 12 視窗）
+pnpm e2e:ui       # 互動式 debug 模式
+pnpm e2e:report   # 看上次失敗時的 HTML report
+```
+
+涵蓋：
+- 17 款 game smoke（路由 + 元件可見 + 無 console error）
+- LuckyWheel 深度 happy path（spin → state 轉換 → won/lost）
+- Mobile drawer 行為（漢堡 / backdrop / ESC / 自動關）
+- Tab 預設回預覽（採納 reviewer 反饋）
+
+PR 提交前 local 跑過 `pnpm e2e` 全綠是基本要求。
+
 ---
 
 ## 快速開始
