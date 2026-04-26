@@ -22,6 +22,13 @@ coverage
 .env.deploy
 .env.deploy.local
 
+# 部署文件 / 腳本（含 k8s manifest 與 SSH deploy script，不推 GitHub）
+/deploy/
+/scripts/deploy-docs.sh
+
+# npm pack 暫存（smoke-published.mjs 會產，正常情況自己清，crash 時遺留兜底）
+*.tgz
+
 # Playwright artifacts
 test-results/
 playwright-report/
