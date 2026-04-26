@@ -1,11 +1,12 @@
+/* Shake — 搖一搖 (RWD：DESIGN_WIDTH = 360) */
 .pk-shake {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 24px;
-  padding: 16px;
+  gap: calc(24 * var(--pk-px, 1px));
+  padding: calc(16 * var(--pk-px, 1px));
   width: 100%;
-  max-width: 360px;
+  max-width: calc(360 * var(--pk-px, 1px));
   position: relative;
 }
 .pk-shake__meta {
@@ -13,7 +14,7 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  font: 500 12px / 1 var(--pk-font-mono);
+  font: 500 calc(12 * var(--pk-px, 1px)) / 1 var(--pk-font-mono);
   color: var(--pk-fg-2);
   letter-spacing: 0.04em;
 }
@@ -27,8 +28,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
-  padding: 24px 32px 36px;
+  gap: calc(16 * var(--pk-px, 1px));
+  padding: calc(24 * var(--pk-px, 1px)) calc(32 * var(--pk-px, 1px)) calc(36 * var(--pk-px, 1px));
   background: radial-gradient(
       ellipse at top,
       color-mix(in oklch, var(--pk-accent-2) 18%, transparent),
@@ -41,14 +42,16 @@
 
 .pk-shake__bottle {
   position: relative;
-  width: 120px;
-  height: 192px;
+  width: calc(120 * var(--pk-px, 1px));
+  height: calc(192 * var(--pk-px, 1px));
   background: none;
   border: 0;
   padding: 0;
   cursor: pointer;
   user-select: none;
-  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.35));
+  filter: drop-shadow(
+    0 calc(8 * var(--pk-px, 1px)) calc(16 * var(--pk-px, 1px)) rgba(0, 0, 0, 0.35)
+  );
   transition: transform var(--pk-duration-fast) ease;
 }
 .pk-shake__bottle:hover:not(:disabled) {
@@ -91,16 +94,16 @@
     transform: scaleY(1);
   }
   50% {
-    transform: scaleY(0.95) translateY(2px);
+    transform: scaleY(0.95) translateY(calc(2 * var(--pk-px, 1px)));
   }
 }
 
 .pk-shake__hint {
   position: absolute;
-  bottom: -8px;
+  bottom: calc(-8 * var(--pk-px, 1px));
   left: 50%;
   transform: translateX(-50%);
-  font: 700 11px / 1 var(--pk-font-mono);
+  font: 700 calc(11 * var(--pk-px, 1px)) / 1 var(--pk-font-mono);
   color: var(--pk-fg-2);
   letter-spacing: 0.14em;
   white-space: nowrap;
@@ -111,8 +114,8 @@
 }
 
 .pk-shake__bar {
-  width: 240px;
-  height: 6px;
+  width: calc(240 * var(--pk-px, 1px));
+  height: calc(6 * var(--pk-px, 1px));
   background: var(--pk-bg-2);
   border: 1px solid var(--pk-border);
   border-radius: 3px;

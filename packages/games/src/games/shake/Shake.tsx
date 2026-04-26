@@ -15,8 +15,9 @@ import { haptic } from '../../core/haptic';
 import { StateBadge } from '../../core/state-badge';
 import type { GameState } from '../../core/types';
 import { useControlled } from '../../core/use-controlled';
+import { useGameScale } from '../../core/use-game-scale';
 import { useReducedMotion } from '../../core/use-reduced-motion';
-import { useI18n } from '../../i18n/provider';
+import { useI18n, useScalePolicy } from '../../i18n/provider';
 import type { ShakeProps, ShakeRef } from './types';
 import './shake.css';
 
@@ -46,6 +47,8 @@ export const Shake = forwardRef<ShakeRef, ShakeProps>(function Shake(
   ref,
 ) {
   const { t } = useI18n();
+  const scalePolicy = useScalePolicy();
+  const scaleRef = useGameScale<HTMLElement>(360, { enabled: scalePolicy === 'auto' });
   const reducedMotion = useReducedMotion();
 
   const [state, setState] = useControlled<GameState>({
@@ -181,6 +184,7 @@ export const Shake = forwardRef<ShakeRef, ShakeProps>(function Shake(
 
   return (
     <section
+      ref={scaleRef}
       {...rest}
       id={id}
       style={style}

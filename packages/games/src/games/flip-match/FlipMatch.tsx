@@ -15,9 +15,10 @@ import { haptic } from '../../core/haptic';
 import { StateBadge } from '../../core/state-badge';
 import type { GameState } from '../../core/types';
 import { useControlled } from '../../core/use-controlled';
+import { useGameScale } from '../../core/use-game-scale';
 import { useLatestRef } from '../../core/use-latest-ref';
 import { useReducedMotion } from '../../core/use-reduced-motion';
-import { useI18n } from '../../i18n/provider';
+import { useI18n, useScalePolicy } from '../../i18n/provider';
 import type { FlipMatchCard, FlipMatchProps, FlipMatchRef } from './types';
 import './flip-match.css';
 
@@ -64,6 +65,8 @@ export const FlipMatch = forwardRef<FlipMatchRef, FlipMatchProps>(function FlipM
   ref,
 ) {
   const { t } = useI18n();
+  const scalePolicy = useScalePolicy();
+  const scaleRef = useGameScale<HTMLElement>(352, { enabled: scalePolicy === 'auto' });
   const reducedMotion = useReducedMotion();
 
   const [state, setState] = useControlled<GameState>({
@@ -204,6 +207,7 @@ export const FlipMatch = forwardRef<FlipMatchRef, FlipMatchProps>(function FlipM
 
   return (
     <section
+      ref={scaleRef}
       {...rest}
       id={id}
       style={style}

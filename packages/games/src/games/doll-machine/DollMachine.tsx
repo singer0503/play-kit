@@ -17,9 +17,10 @@ import { StateBadge } from '../../core/state-badge';
 import type { GameState, Prize } from '../../core/types';
 import { useAnimationLoop } from '../../core/use-animation-loop';
 import { useControlled } from '../../core/use-controlled';
+import { useGameScale } from '../../core/use-game-scale';
 import { useLatestRef } from '../../core/use-latest-ref';
 import { useReducedMotion } from '../../core/use-reduced-motion';
-import { useI18n } from '../../i18n/provider';
+import { useI18n, useScalePolicy } from '../../i18n/provider';
 import type { DollMachineProps, DollMachineRef } from './types';
 import './doll-machine.css';
 
@@ -56,6 +57,8 @@ export const DollMachine = forwardRef<DollMachineRef, DollMachineProps>(function
   ref,
 ) {
   const { t, lang } = useI18n();
+  const scalePolicy = useScalePolicy();
+  const scaleRef = useGameScale<HTMLElement>(372, { enabled: scalePolicy === 'auto' });
   const reducedMotion = useReducedMotion();
 
   const [state, setState] = useControlled<GameState>({
@@ -206,6 +209,7 @@ export const DollMachine = forwardRef<DollMachineRef, DollMachineProps>(function
 
   return (
     <section
+      ref={scaleRef}
       {...rest}
       id={id}
       style={style}
