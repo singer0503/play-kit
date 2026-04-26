@@ -446,6 +446,8 @@
   overflow: hidden;
   background: var(--pk-bg-ink);
   border: 1px solid var(--pk-border);
+  /* mobile: 不被 <pre> 內最長一行撐大；<pre> 自己 overflow-x:auto 可滾 */
+  min-width: 0;
 }
 .docs-code__shiki pre {
   margin: 0;
@@ -619,6 +621,16 @@
   grid-template-columns: 1fr 220px;
   gap: 48px;
   align-items: start;
+}
+/* grid / flex children 預設 min-width: auto = min-content，會被 <pre> 等
+ * 不換行內容撐大整個 layout（mobile 320px viewport 撐到 643px）。
+ * 這條讓所有後代 container 可正常縮，<pre> 等仍可自家 overflow-x: auto。 */
+.docs-page-wrap *,
+.docs-section,
+.docs-code,
+.docs-stage,
+.docs-playground__stage {
+  min-width: 0;
 }
 .docs-otp {
   position: sticky;
