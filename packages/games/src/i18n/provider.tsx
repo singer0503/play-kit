@@ -24,11 +24,25 @@ const DICTS: Record<Lang, Record<string, string>> = {
 
 const I18nContext = createContext<I18nContextValue | null>(null);
 
+/**
+ * 縮放政策：
+ * - `'auto'`（預設）：每款 game 內部用 `useGameScale` + ResizeObserver 在窄容器自動等比縮放
+ * - `'off'`：embedder 想保證 game 維持設計尺寸時關閉，hook 變 no-op
+ */
+export type ScalePolicy = 'auto' | 'off';
+const ScalePolicyContext = createContext<ScalePolicy>('auto');
+
 export interface PlayKitProviderProps extends HTMLAttributes<HTMLDivElement> {
   /** 語系；預設 'zh-TW'。若未傳，內部 game 仍可呼叫 useI18n() */
   lang?: Lang;
   /** 主題；會設 `data-theme` 到 provider root div，讓 tokens.css 生效 */
   theme?: ThemeName;
+  /**
+   * 響應式縮放政策。預設 `'auto'`：
+   * - `'auto'`：game 在窄容器自動等比縮（containerWidth < designWidth）
+   * - `'off'`：完全關閉縮放，game 維持設計尺寸（embedder 自管 layout）
+   */
+  scale?: ScalePolicy;
   /**
    * 當設定 `theme` 時，預設會輸出一個 `<div data-theme>` 作為主題邊界。
    * 若呼叫端已在外層自己設 `<html data-theme>`，可傳 false 跳過 wrapper。
@@ -49,6 +63,7 @@ export interface PlayKitProviderProps extends HTMLAttributes<HTMLDivElement> {
 export function PlayKitProvider({
   lang = 'zh-TW',
   theme,
+  scale = 'auto',
   wrap,
   children,
   className,
@@ -66,7 +81,11 @@ export function PlayKitProvider({
     return { lang, t };
   }, [lang]);
 
-  const node = <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
+  const node = (
+    <ScalePolicyContext.Provider value={scale}>
+      <I18nContext.Provider value={value}>{children}</I18nContext.Provider>
+    </ScalePolicyContext.Provider>
+  );
 
   // 預設行為：有傳 theme 才 wrap；顯式傳 wrap=true 也 wrap（方便注入 className / data-*）
   const shouldWrap = wrap ?? theme !== undefined;
@@ -93,4 +112,17 @@ const FALLBACK: I18nContextValue = {
 
 export function useI18n(): I18nContextValue {
   return useContext(I18nContext) ?? FALLBACK;
+}
+
+/**
+ * 讀取目前的縮放政策。未包 PlayKitProvider 時 fallback 為 'auto'。
+ *
+ * 各 game 在組件內這樣用：
+ * ```tsx
+ * const policy = useScalePolicy();
+ * const scaleRef = useGameScale(340, { enabled: policy === 'auto' });
+ * ```
+ */
+export function useScalePolicy(): ScalePolicy {
+  return useContext(ScalePolicyContext);
 }

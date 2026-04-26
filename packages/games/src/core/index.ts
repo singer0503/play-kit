@@ -5,6 +5,8 @@ export { useReducedMotion } from './use-reduced-motion';
 export { useAnimationLoop } from './use-animation-loop';
 export type { AnimationLoopOptions } from './use-animation-loop';
 export { useLatestRef } from './use-latest-ref';
+export { useGameScale } from './use-game-scale';
+export type { UseGameScaleOptions } from './use-game-scale';
 export { resolveLocalized } from './i18n-utils';
 export type { LocalizableText } from './i18n-utils';
 export { pickPrize } from './use-prize';
