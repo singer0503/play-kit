@@ -17,14 +17,17 @@ import { isSSR } from '../../core/is-ssr';
 import { StateBadge } from '../../core/state-badge';
 import type { GameState } from '../../core/types';
 import { useControlled } from '../../core/use-controlled';
+import { useGameScale } from '../../core/use-game-scale';
 import { useReducedMotion } from '../../core/use-reduced-motion';
-import { useI18n } from '../../i18n/provider';
+import { useI18n, useScalePolicy } from '../../i18n/provider';
 import type { ScratchCardProps, ScratchCardRef } from './types';
 import './scratch-card.css';
 
 const CARD_W = 320;
 const CARD_H = 180;
-const BRUSH = 44; // 刮痕線寬 px
+const BRUSH = 44; // 刮痕線寬 px（drawing space）
+/** 設計基準寬：CARD_W=320 + 周邊 padding，外層 max ≈ 380。useGameScale 用此計算窄容器 scale。 */
+const DESIGN_WIDTH = 380;
 
 export const ScratchCard = forwardRef<ScratchCardRef, ScratchCardProps>(function ScratchCard(
   {
@@ -47,6 +50,10 @@ export const ScratchCard = forwardRef<ScratchCardRef, ScratchCardProps>(function
   ref,
 ) {
   const { t, lang } = useI18n();
+  const scalePolicy = useScalePolicy();
+  const scaleRef = useGameScale<HTMLElement>(DESIGN_WIDTH, {
+    enabled: scalePolicy === 'auto',
+  });
   const reducedMotion = useReducedMotion();
 
   const [state, setState] = useControlled<GameState>({
@@ -75,11 +82,15 @@ export const ScratchCard = forwardRef<ScratchCardRef, ScratchCardProps>(function
   const paintCover = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas || isSSR()) return;
+    // Canvas display 尺寸由 CSS 控制（width/height 100% 跟著 .pk-sc__card --pk-px scale），
+    // 內部 buffer 永遠維持 CARD_W * dpr × CARD_H * dpr 的「設計基準解析度」：
+    // - scale=1 時：內部 = 320 * 2 = 640，display = 320，pixel-density = 2dpr ✓
+    // - scale<1 時：內部不變，display 變小，等於 over-sample，視覺仍清晰
+    // 不依 scale 調整內部尺寸的好處：避免 ResizeObserver 觸發時清空 canvas 內容（
+    // canvas.width = N 會清空），保留使用者刮的進度
     const dpr = window.devicePixelRatio || 1;
     canvas.width = CARD_W * dpr;
     canvas.height = CARD_H * dpr;
-    canvas.style.width = `${CARD_W}px`;
-    canvas.style.height = `${CARD_H}px`;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -264,22 +275,32 @@ export const ScratchCard = forwardRef<ScratchCardRef, ScratchCardProps>(function
     ctx.globalCompositeOperation = 'source-over';
   }, []);
 
+  // 把 client 座標轉成 drawing 座標（CARD_W × CARD_H 空間）。
+  // 當 RWD 把 canvas display 縮到 50%（rect.width=160），點到 (80,...) 應映射到
+  // (160) drawing space，而不是 (80)。乘 CARD_W / rect.width 處理此轉換。
+  const clientToDrawing = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = rect.width > 0 ? ((e.clientX - rect.left) * CARD_W) / rect.width : 0;
+    const y = rect.height > 0 ? ((e.clientY - rect.top) * CARD_H) / rect.height : 0;
+    return { x, y };
+  };
+
   const onPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (state === 'claimed' || state === 'cooldown' || state === 'won' || state === 'lost') return;
     const canvas = e.currentTarget;
     canvas.setPointerCapture(e.pointerId);
     draggingRef.current = true;
     lastPtRef.current = null;
-    const rect = canvas.getBoundingClientRect();
-    drawStroke(e.clientX - rect.left, e.clientY - rect.top);
+    const { x, y } = clientToDrawing(e);
+    drawStroke(x, y);
     scheduleProgressCheck();
   };
   const onPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (!draggingRef.current) return;
     if (state === 'claimed' || state === 'cooldown' || state === 'won' || state === 'lost') return;
     e.preventDefault();
-    const rect = e.currentTarget.getBoundingClientRect();
-    drawStroke(e.clientX - rect.left, e.clientY - rect.top);
+    const { x, y } = clientToDrawing(e);
+    drawStroke(x, y);
     scheduleProgressCheck();
   };
   const onPointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -303,6 +324,7 @@ export const ScratchCard = forwardRef<ScratchCardRef, ScratchCardProps>(function
 
   return (
     <section
+      ref={scaleRef}
       {...rest}
       id={id}
       style={style}
