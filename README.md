@@ -225,8 +225,8 @@ function App() {
 請見 [CONTRIBUTING.md](./CONTRIBUTING.md)。內部工程規範詳見 [CLAUDE.md](./CLAUDE.md)。
 
 歡迎 issue / PR：
-- Bug → [Open issue](https://github.com/singer0503/mini-game/issues/new)
-- Feature 提案 → 同上，或先 [discussion](https://github.com/singer0503/mini-game/discussions)
+- Bug → [Open issue](https://github.com/singer0503/play-kit/issues/new)
+- Feature 提案 → 同上，或先 [discussion](https://github.com/singer0503/play-kit/discussions)
 - 安全漏洞 → 請勿開 public issue，email 至 `singer0503@gmail.com`
 
 ---

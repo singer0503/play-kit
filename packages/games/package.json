@@ -16,14 +16,14 @@
     "controlled",
     "forwardRef"
   ],
-  "homepage": "https://github.com/singer0503/mini-game#readme",
+  "homepage": "https://github.com/singer0503/play-kit#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/singer0503/mini-game.git",
+    "url": "git+https://github.com/singer0503/play-kit.git",
     "directory": "packages/games"
   },
   "bugs": {
-    "url": "https://github.com/singer0503/mini-game/issues"
+    "url": "https://github.com/singer0503/play-kit/issues"
   },
   "license": "MIT",
   "author": "singer0503",
