@@ -41,10 +41,10 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./styles.css": "./dist/styles.css",
+    "./styles.css": "./dist/index.css",
     "./package.json": "./package.json"
   },
-  "files": ["dist", "README.md", "CHANGELOG.md"],
+  "files": ["dist", "README.md", "CHANGELOG.md", "LICENSE"],
   "scripts": {
     "build": "vite build && tsc --emitDeclarationOnly -p tsconfig.build.json",
     "dev": "vite build --watch",
