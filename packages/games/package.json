@@ -1,6 +1,6 @@
 {
   "name": "@play-kit/games",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "17 React mini-games (lucky wheel, scratch card, nine-grid, slot machine, ...) with 6-state machines, a11y, SSR-safe, zero non-peer deps.",
   "keywords": [
     "react",

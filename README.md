@@ -196,13 +196,28 @@ function App() {
 
 ---
 
-## 📱 Mobile / RWD
+## 📱 Mobile / RWD（v0.2.0+）
 
-各 game 的內層「機器」元件（轉盤、刮刮卡 canvas、轉輪等）目前**寬度設計鎖在 320–360 px**，為了視覺校準。
+每款 game 透過 `useGameScale` hook + ResizeObserver 在窄容器自動等比縮放：
 
-- **建議容器寬度**：≥ 360 px。多數現代手機（iPhone SE 寬 375 px、iPhone 12 寬 390 px）都符合。
-- **更窄容器**：以您自己的 layout 控制（`max-width` / `transform: scale()` / 容器查詢）。
-- **完整 RWD 規劃**：v0.2.0 將每款 game 改成內層 percentage / container-aware width，目前 v0.1.x 屬於 desktop-first 階段。
+- **任意寬度容器**都能塞 — 比設計尺寸窄就等比縮，比設計尺寸寬則保持設計尺寸（不放大）
+- **完全 CSS-driven** — `--pk-px` 變數驅動，包含 transform / keyframe 位移、box-shadow、font-size 全部 scale-aware
+- **老設備相容** — ResizeObserver 起自 iOS 13.4 / Chrome 64（2018+），覆蓋 ≥ 99% 真實使用者
+- **想固定設計尺寸**：`<PlayKitProvider scale="off">`
+
+```tsx
+// 自動縮（預設）
+<PlayKitProvider>
+  <div style={{ width: 240 }}>  {/* 比設計尺寸窄 → 自動縮 */}
+    <LuckyWheel prizes={...} />
+  </div>
+</PlayKitProvider>
+
+// 固定設計尺寸（embedder 自管 layout）
+<PlayKitProvider scale="off">
+  <LuckyWheel prizes={...} />  {/* 永遠以設計尺寸渲染 */}
+</PlayKitProvider>
+```
 
 ---
 
@@ -222,9 +237,9 @@ function App() {
 
 | Asset | Raw | Gzip |
 |---|---:|---:|
-| `dist/index.js` (ESM) | 122 KB | 27 KB |
-| `dist/index.cjs` (CJS) | 80 KB | 23 KB |
-| `dist/index.css` | 52 KB | 10 KB |
+| `dist/index.js` (ESM) | 124 KB | 27 KB |
+| `dist/index.cjs` (CJS) | 81 KB | 23 KB |
+| `dist/index.css` | 65 KB | 10 KB |
 
 支援 tree-shaking — 只 import 用得到的 game、bundler 會剔除其他款。
 
