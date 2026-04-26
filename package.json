@@ -19,6 +19,7 @@
     "format": "biome format --write .",
     "check:docs": "pnpm -C packages/games check:docs",
     "check:ssr": "pnpm -C packages/games check:ssr",
+    "smoke:published": "node scripts/smoke-published.mjs",
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui",
     "e2e:build": "pnpm build:lib && pnpm -C apps/docs build",
