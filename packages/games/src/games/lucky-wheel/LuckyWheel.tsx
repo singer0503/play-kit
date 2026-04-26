@@ -18,13 +18,16 @@ import { isSSR } from '../../core/is-ssr';
 import { StateBadge } from '../../core/state-badge';
 import type { GameState } from '../../core/types';
 import { useControlled } from '../../core/use-controlled';
+import { useGameScale } from '../../core/use-game-scale';
 import { pickPrize } from '../../core/use-prize';
 import { useReducedMotion } from '../../core/use-reduced-motion';
-import { useI18n } from '../../i18n/provider';
+import { useI18n, useScalePolicy } from '../../i18n/provider';
 import type { LuckyWheelPrize, LuckyWheelProps, LuckyWheelRef } from './types';
 import './lucky-wheel.css';
 
 const BULB_COUNT = 16;
+/** LuckyWheel 設計基準寬：board 340 + 周邊 padding，整體 max ≈ 372。useGameScale 用此計算窄容器 scale。 */
+const DESIGN_WIDTH = 372;
 
 export const LuckyWheel = forwardRef<LuckyWheelRef, LuckyWheelProps>(function LuckyWheel(
   {
@@ -54,6 +57,10 @@ export const LuckyWheel = forwardRef<LuckyWheelRef, LuckyWheelProps>(function Lu
 ) {
   const { t, lang } = useI18n();
   const reducedMotion = useReducedMotion();
+  const scalePolicy = useScalePolicy();
+  const scaleRef = useGameScale<HTMLElement>(DESIGN_WIDTH, {
+    enabled: scalePolicy === 'auto',
+  });
 
   const [state, setState] = useControlled<GameState>({
     controlled: stateProp,
@@ -225,6 +232,7 @@ export const LuckyWheel = forwardRef<LuckyWheelRef, LuckyWheelProps>(function Lu
 
   return (
     <section
+      ref={scaleRef}
       {...rest}
       id={id}
       style={style}

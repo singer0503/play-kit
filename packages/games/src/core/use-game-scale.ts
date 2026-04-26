@@ -52,12 +52,20 @@ export function useGameScale<T extends HTMLElement = HTMLElement>(
       return;
     }
 
-    const apply = (w: number) => {
-      const scale = w > 0 ? Math.min(1, w / designWidth) : 1;
+    // 觀察 parent 寬度而非 element 自己。
+    // 為什麼：game 的 children 用 `calc(N * var(--pk-px))` 表達寬度，
+    // 寫入 --pk-scale 會讓 children 縮 → element 自己也縮（hug-content layout）
+    // → ResizeObserver 再 fire → 寫入更小的 scale → 無限迴圈直到 scale=0。
+    // Parent 的寬度由其上層 layout 決定，獨立於 children，不會回饋。
+    const parent = el.parentElement;
+    if (!parent) return;
+
+    const apply = (parentWidth: number) => {
+      const scale = parentWidth > 0 ? Math.min(1, parentWidth / designWidth) : 1;
       el.style.setProperty('--pk-scale', String(scale));
     };
 
-    apply(el.clientWidth);
+    apply(parent.clientWidth);
 
     if (typeof ResizeObserver === 'undefined') {
       // 老設備（pre-2020）：set 一次當下值就退出，game 維持設計尺寸
@@ -69,7 +77,7 @@ export function useGameScale<T extends HTMLElement = HTMLElement>(
       if (!entry) return;
       apply(entry.contentRect.width);
     });
-    ro.observe(el);
+    ro.observe(parent);
     return () => ro.disconnect();
   }, [designWidth, enabled]);
 
