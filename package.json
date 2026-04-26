@@ -18,10 +18,12 @@
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
     "check:docs": "pnpm -C packages/games check:docs",
+    "check:readme": "pnpm -C packages/games exec tsx ../../scripts/verify-readme.ts",
     "check:ssr": "pnpm -C packages/games check:ssr",
     "smoke:published": "node scripts/smoke-published.mjs",
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui",
+    "e2e:audit": "playwright test --grep \"reduced-motion\" --project desktop-chrome",
     "e2e:build": "pnpm build:lib && pnpm -C apps/docs build",
     "e2e:report": "playwright show-report",
     "changeset": "changeset"

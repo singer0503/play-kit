@@ -85,7 +85,9 @@ export function Sidebar({ route, lang }: { route: string; lang: DocsLang }) {
           target="_blank"
           rel="noopener noreferrer"
         >
-          <span className="docs-navitem__dot" aria-hidden="true">↗</span>
+          <span className="docs-navitem__dot" aria-hidden="true">
+            ↗
+          </span>
           <span>{s.resources.examples}</span>
         </a>
         <a
@@ -94,7 +96,9 @@ export function Sidebar({ route, lang }: { route: string; lang: DocsLang }) {
           target="_blank"
           rel="noopener noreferrer"
         >
-          <span className="docs-navitem__dot" aria-hidden="true">↗</span>
+          <span className="docs-navitem__dot" aria-hidden="true">
+            ↗
+          </span>
           <span>{s.resources.github}</span>
         </a>
       </div>

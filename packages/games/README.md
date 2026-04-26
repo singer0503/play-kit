@@ -147,8 +147,8 @@ function App() {
 | `Marquee` | `(prize: MarqueePrize)` | `(prize: MarqueePrize)` | |
 | `SlotMachine` | `(symbols: readonly number[])` | `(symbols: readonly number[])` | 三輪停下來的 symbol index |
 | `LottoRoll` | `(numbers: readonly number[])` | `(numbers: readonly number[])` | 抽中的號碼 |
-| `ShakeDice` | `(faces: readonly number[], sum: number)` | `(faces, sum)` | 各骰面 + 加總 |
-| `FlipMatch` | `(moves: number, timeSec: number)` | `(moves, timeSec)` | |
+| `ShakeDice` | `(faces: readonly number[], sum: number)` | `(faces: readonly number[], sum: number)` | 各骰面 + 加總 |
+| `FlipMatch` | `(moves: number, timeSec: number)` | `(moves: number, timeSec: number)` | |
 | `Quiz` | `(score: number)` | `(score: number)` | total 在 `onEnd(score, total, won)` |
 | `RingToss` | `(hits: number)` | `(hits: number)` | |
 | `GiftRain` | `(score: number)` | `(score: number)` | |

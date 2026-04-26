@@ -32,6 +32,9 @@ jobs:
       - name: Docs drift check
         run: pnpm check:docs
 
+      - name: README events table drift check
+        run: pnpm check:readme
+
       - name: SSR safety check
         run: pnpm check:ssr
 
@@ -43,3 +46,9 @@ jobs:
 
       - name: Docs build
         run: pnpm -C apps/docs build
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Reduced-motion audit (e2e)
+        run: pnpm e2e:audit
