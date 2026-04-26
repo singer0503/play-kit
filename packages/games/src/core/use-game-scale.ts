@@ -37,7 +37,9 @@ export interface UseGameScaleOptions {
 export function useGameScale<T extends HTMLElement = HTMLElement>(
   designWidth: number,
   options: UseGameScaleOptions = {},
-): RefObject<T> {
+): RefObject<T | null> {
+  // RefObject<T | null> 是 React 19 useRef<T>(null) 的精準回傳型別。
+  // React 18 的 RefObject<T> 是這個的一個子集，consumer 用 React 18 也可工作（賦值給 JSX ref prop 通用）。
   const { enabled = true } = options;
   const ref = useRef<T>(null);
 

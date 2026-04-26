@@ -299,6 +299,123 @@ import { LuckyWheel, PlayKitProvider } from '@play-kit/games';
 
 ---
 
+## 📚 完整可跑範例
+
+[`examples/`](./examples/) 內有兩支最小可跑骨架，clone 即用：
+
+| Starter | Stack | 跑法 |
+|---|---|---|
+| [vite-react](./examples/vite-react) | Vite 5 + React 19 SPA | `pnpm install && pnpm dev` |
+| [next-app-router](./examples/next-app-router) | Next.js 16 + App Router + React 19 | `pnpm install && pnpm dev` |
+
+Next 版本展示 `'use client'` 邊界正確劃法（root layout 仍是 server component、`PlayKitProvider` 在獨立 boundary、game 互動是 client island）。詳見各 `README.md`。
+
+---
+
+## ❓ FAQ / Troubleshooting
+
+### Q1. Next.js App Router 怎麼 wire？必須整個 layout `'use client'` 嗎？
+
+**不用**。`PlayKitProvider` 用 React Context 必須在 client，但只把它包成獨立 client component 即可，layout 仍可保留 server component（保留 streaming / RSC 收益）。
+
+```tsx
+// app/providers.tsx — client boundary
+'use client';
+import { PlayKitProvider } from '@play-kit/games/i18n';
+export function Providers({ children }) {
+  return <PlayKitProvider lang="zh-TW">{children}</PlayKitProvider>;
+}
+
+// app/layout.tsx — 仍是 server component
+import { Providers } from './providers';
+import '@play-kit/games/styles.css';
+export default function RootLayout({ children }) {
+  return <html><body><Providers>{children}</Providers></body></html>;
+}
+```
+
+完整範例見 [`examples/next-app-router/`](./examples/next-app-router)。
+
+### Q2. 我的 Vitest / Jest 跑 component test 報 `ERR_UNKNOWN_FILE_EXTENSION` 在 `.css`
+
+純 Node 沒 CSS loader。三條解：
+
+```ts
+// 解 1：Vitest — vitest.config.ts
+export default defineConfig({ test: { css: true } });
+
+// 解 2：Jest — jest.config.js
+module.exports = { moduleNameMapper: { '\\.css$': '<rootDir>/test/css-stub.js' } };
+// css-stub.js 內容只要 module.exports = {};
+
+// 解 3（最簡單）：把 import '@play-kit/games/styles.css' 從 component 抽到 app entry
+//                  （main.tsx / _app.tsx），test 環境的 component 檔不直接 import CSS。
+//                  renderToString / render 都不需要 CSS 即可驗 HTML + a11y。
+```
+
+### Q3. Game 在我的 CSS Grid 容器內變成全寬、`useGameScale` 沒縮放？
+
+`useGameScale` 量 **parent container** 寬度。如果 game 放在 `display: grid` 或 `display: flex` 的子位置，predefined `min-width: auto` = `min-content`，game 內部 design 寬度會把 grid track 撐大、useGameScale 量到「container 夠大」就不啟動縮放。
+
+修法：把 game 容器的 `min-width` 改 0：
+
+```css
+/* 你的 layout */
+.my-game-grid > * { min-width: 0; }       /* grid item 可正常縮 */
+/* 或 */
+.my-game-wrapper { min-width: 0; }        /* flex item 同理 */
+```
+
+或直接給容器一個 `max-width: 100%; overflow: hidden;`。
+
+### Q4. 怎麼自定義 theme，可改的 CSS 變數有哪些？
+
+`PlayKitProvider theme="<name>"` 切 4 個內建 theme（`nocturne` / `light` / `neon` / `holo`）。想改色用 CSS variables override：
+
+```css
+[data-theme='nocturne'] {
+  --pk-accent: oklch(0.85 0.15 200);   /* 換成你的品牌色 */
+  --pk-bg-0: #0a0a0f;
+}
+```
+
+可改的核心 vars（自家命名空間 `--pk-*`）：
+- `--pk-bg-0` / `--pk-bg-1` / `--pk-bg-2` — 背景三層
+- `--pk-fg-0` / `--pk-fg-1` / `--pk-fg-2` — 文字三層
+- `--pk-accent` / `--pk-accent-2` / `--pk-accent-3` — 主強調色
+- `--pk-border` / `--pk-border-strong` — 邊框
+- `--pk-r-sm` / `--pk-r-md` / `--pk-r-lg` — radius
+
+完整列表見 `packages/games/src/theme/tokens.css`。
+
+### Q5. 我想 opt-in `prefers-reduced-motion`，怎麼測試？
+
+Game 已內建：偵測到 `prefers-reduced-motion: reduce` 自動跳過動畫直達終態。
+
+開發端模擬：Chrome DevTools → Cmd+Shift+P → "Emulate CSS prefers-reduced-motion" → "reduce"。重 render game，按 spin 應**瞬間**揭曉。
+
+### Q6. SSR `renderToString` 後的 HTML 沒帶 CSS，為什麼？
+
+`@play-kit/games/styles.css` 是獨立 entry，不會被 game JS 自動 inline 進 SSR 輸出。Consumer 需在 app HTML `<head>` 自己 link CSS。Next.js / Vite 的 SSR pipeline 已自動處理（`import` CSS 即會 collect 到 head）。手寫 SSR：
+
+```tsx
+import { renderToString } from 'react-dom/server';
+import { LuckyWheel } from '@play-kit/games/lucky-wheel';
+
+const html = renderToString(<LuckyWheel prizes={prizes} />);
+
+// 別忘了 head 內加：
+const fullHtml = `<!doctype html><html><head>
+  <link rel="stylesheet" href="/static/play-kit-games-styles.css" />
+</head><body><div id="root">${html}</div></body></html>`;
+```
+
+### Q7. 升級到 0.3.0 我需要改 import 嗎？
+
+**不需要**。0.3.0 的 multi-entry build 副作用是 main barrel 也精準 tree-shake。`import { LuckyWheel } from '@play-kit/games'` 跟新的 sub-path 寫法產出 bundle 大小幾乎一樣。Sub-path 寫法只是更明確、對較舊的 bundler 也更穩。
+
+---
+
 ## 🤝 貢獻
 
 請見 [CONTRIBUTING.md](./CONTRIBUTING.md)。內部工程規範詳見 [CLAUDE.md](./CLAUDE.md)。

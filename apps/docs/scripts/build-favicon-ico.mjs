@@ -11,8 +11,8 @@
 // （globe 圖示），原因可能是 BMP DIB pixel order / AND mask 對齊細節。
 // PNG-in-ICO 把 PNG 完整放進 ICO，零位元格式風險。
 
-import { writeFileSync, readFileSync } from 'node:fs';
-import { resolve, dirname } from 'node:path';
+import { readFileSync, writeFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
 

@@ -10,10 +10,10 @@
 //   1. 啟動 preview server 在 :4322（pnpm -C apps/docs preview --port 4322）
 //   2. node scripts/mobile-review.mjs
 
-import { chromium, devices } from '@playwright/test';
 import { mkdirSync, writeFileSync } from 'node:fs';
-import { resolve, dirname } from 'node:path';
+import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { chromium, devices } from '@playwright/test';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, '..');
@@ -21,9 +21,23 @@ const OUT = resolve(REPO, 'mobile-review');
 mkdirSync(OUT, { recursive: true });
 
 const games = [
-  'lucky-wheel', 'nine-grid', 'scratch-card', 'smash-egg', 'slot-machine',
-  'lotto-roll', 'gift-box', 'gift-rain', 'flip-match', 'quiz', 'shake',
-  'shake-dice', 'ring-toss', 'guess-gift', 'doll-machine', 'marquee', 'daily-checkin',
+  'lucky-wheel',
+  'nine-grid',
+  'scratch-card',
+  'smash-egg',
+  'slot-machine',
+  'lotto-roll',
+  'gift-box',
+  'gift-rain',
+  'flip-match',
+  'quiz',
+  'shake',
+  'shake-dice',
+  'ring-toss',
+  'guess-gift',
+  'doll-machine',
+  'marquee',
+  'daily-checkin',
 ];
 
 const viewports = [
@@ -58,7 +72,7 @@ for (const vp of viewports) {
       const cs = getComputedStyle(game);
 
       // root scale
-      const scale = parseFloat(cs.getPropertyValue('--pk-scale') || '1');
+      const scale = Number.parseFloat(cs.getPropertyValue('--pk-scale') || '1');
 
       // 主要 buttons：找根 section 內的 <button>
       const buttons = Array.from(game.querySelectorAll('button'));
@@ -100,11 +114,11 @@ for (const vp of viewports) {
     findings.push({ id, vp: vp.id, ...data });
     console.log(
       `  ${id.padEnd(14)} ${vp.id.padEnd(11)} ` +
-      `scale ${(data?.scale ?? 0).toFixed(2)}  ` +
-      `game ${data?.gameW}×${data?.gameH}px  ` +
-      `${data?.fits ? '✓ fits' : '✗ overflow'} ` +
-      `${data?.overflowX ? '· page overflow-x!' : ''} ` +
-      `· main btn ${data?.btnSizes[0]?.w}×${data?.btnSizes[0]?.h}`,
+        `scale ${(data?.scale ?? 0).toFixed(2)}  ` +
+        `game ${data?.gameW}×${data?.gameH}px  ` +
+        `${data?.fits ? '✓ fits' : '✗ overflow'} ` +
+        `${data?.overflowX ? '· page overflow-x!' : ''} ` +
+        `· main btn ${data?.btnSizes[0]?.w}×${data?.btnSizes[0]?.h}`,
     );
   }
 
