@@ -32,14 +32,15 @@
   - 預設行為改變：在窄容器（< 設計寬度）會自動縮，不再溢出
   - 想保持舊行為（固定設計尺寸）：`<PlayKitProvider scale="off">`
 
-  ### Known limitations
-
-  - `slot-machine` 與 `doll-machine` 內部 rAF inline transform 用 px 值；scale=1 時完全正確，scale<1 時動畫位移略大於視覺尺寸（不影響功能，視覺微差）。v0.2.x patch 處理（改用 CSS 變數驅動，JS 寫 unitless 數值）
-
   ### Other
 
+  - `slot-machine` 內部 rAF 寫 transform 前讀 `--pk-scale` 乘上去，視覺位移與 symbol 高度同步（任意 scale 都正確）
+  - `doll-machine` 內部 rAF 用 `%` 為單位（已 scale-friendly，無需額外處理）
+  - 切 game 時 docs site 自動 scroll 回頁頂（不再卡在前一頁的 props/events 表底）
+  - StateMatrix tile 包 `<PlayKitProvider scale="off">`，避免與 transform: scale(0.4) thumbnail 雙重縮放打架
   - 新增 `e2e/scratch-card.spec.ts`（drag 刮過 → state won/lost）
   - core.css 共用 primitives（`.pk-state-badge` / `.pk-bulb` / `.pk-btn` / 共用 keyframes）全部 RWD-aware
+  - `PlayKitProvider` 巢狀 friendly：未指定 `lang` / `scale` 時繼承外層 context（不再強制 default 'zh-TW' / 'auto'）
 
 ## 0.1.0
 

@@ -1,11 +1,11 @@
 /* SlotMachine — 三輪錯開停止 (RWD：DESIGN_WIDTH = 400)
  *
- * 注意 reel rAF 動畫的 px 同步：
+ * Reel rAF 動畫的 px 同步（SlotMachine.tsx 處理）：
  * - SYMBOL_H 在 JS 設計空間為 72px；CSS 對應 .pk-slot__reel/__sym 的 height
  *   也用 calc(72 * var(--pk-px, 1px))，scale 縮小時兩邊同步
- * - JS rAF 寫 `el.style.transform = translateY(${y}px)`，y 是設計空間的 px
- *   累積值。CSS 沒辦法在 inline style transform 上自動 scale（瀏覽器不會
- *   重算 inline style），故 SlotMachine.tsx 內部會把 y 乘 scale 後再寫入。
+ * - JS rAF 寫 `el.style.transform = translateY(${y * scale}px)`，
+ *   scale 從 scaleRef.current 的 inline `--pk-scale` 讀，確保任何
+ *   container width 下 strip 移動視覺上都對應 symbol 高度（精準對齊 viewport）
  */
 .pk-slot {
   display: flex;
