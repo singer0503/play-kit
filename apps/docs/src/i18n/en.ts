@@ -29,6 +29,8 @@ export interface DocsStrings {
     onThisPage: string;
     playground: string;
     stateMatrix: string;
+    menu: string;
+    closeMenu: string;
   };
   home: {
     kicker: string;
@@ -74,6 +76,8 @@ export const en: DocsStrings = {
     onThisPage: 'On this page',
     playground: 'Interactive Playground',
     stateMatrix: 'State Matrix',
+    menu: 'Open menu',
+    closeMenu: 'Close menu',
   },
   home: {
     kicker: 'React Mini-Game Kit',

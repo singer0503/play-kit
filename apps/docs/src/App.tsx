@@ -32,6 +32,7 @@ export function App() {
   const [theme, setTheme] = useState<ThemeName>(readTheme);
   const [lang, setLang] = useState<DocsLang>(readLang);
   const [route, setRoute] = useState<string>(readRoute);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // theme → <html data-theme> + persist
   useEffect(() => {
@@ -49,14 +50,46 @@ export function App() {
     window.addEventListener('hashchange', handler);
     return () => window.removeEventListener('hashchange', handler);
   }, []);
+  // 切 game / 切 home 時自動關 mobile drawer
+  // biome-ignore lint/correctness/useExhaustiveDependencies: 故意在 route 變化時 retrigger，effect 本身不讀 route
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [route]);
+  // ESC 關閉 mobile drawer
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSidebarOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [sidebarOpen]);
+  // body scroll lock when drawer open
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [sidebarOpen]);
 
   const game = byId.get(route);
+  const closeSidebar = () => setSidebarOpen(false);
 
   return (
     <DocsLangContext.Provider value={lang}>
       <PlayKitProvider lang={lang}>
-        <div className="docs-shell">
+        <div className={`docs-shell${sidebarOpen ? ' docs-shell--open' : ''}`}>
           <Sidebar route={route} lang={lang} />
+          {sidebarOpen ? (
+            <button
+              type="button"
+              className="docs-shell__backdrop"
+              aria-label="Close menu"
+              onClick={closeSidebar}
+            />
+          ) : null}
           <div className="docs-main">
             <TopBar
               theme={theme}
@@ -64,9 +97,10 @@ export function App() {
               lang={lang}
               onLangChange={setLang}
               route={route}
+              onMenuToggle={() => setSidebarOpen((v) => !v)}
             />
             <main className="docs-main__scroll">
-              {game ? <GamePage game={game} lang={lang} /> : <Home lang={lang} />}
+              {game ? <GamePage key={game.id} game={game} lang={lang} /> : <Home lang={lang} />}
             </main>
           </div>
         </div>

@@ -30,6 +30,8 @@ export const zhTW: DocsStrings = {
     onThisPage: '本頁目錄',
     playground: '互動 Playground',
     stateMatrix: '狀態矩陣',
+    menu: '開啟選單',
+    closeMenu: '關閉選單',
   },
   home: {
     kicker: 'React 迷你遊戲組件庫',

@@ -121,11 +121,65 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   padding: 16px 28px;
   background: color-mix(in oklch, var(--pk-bg-0) 85%, transparent);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--pk-border);
 }
+.docs-topbar__lead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.docs-topbar__menu {
+  display: none;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  background: var(--pk-bg-2);
+  border: 1px solid var(--pk-border);
+  border-radius: var(--pk-r-md);
+  color: var(--pk-fg-1);
+  cursor: pointer;
+  font: 700 18px / 1 var(--pk-font-sans);
+  flex-shrink: 0;
+}
+.docs-topbar__menu:hover {
+  background: var(--pk-bg-1);
+  color: var(--pk-fg-0);
+}
+.docs-topbar__menu:focus-visible {
+  outline: 2px solid var(--pk-accent);
+  outline-offset: 2px;
+}
+
+/* mobile drawer backdrop（桌面版預設不顯示） */
+.docs-shell__backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  background: color-mix(in oklch, black 55%, transparent);
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  animation: docsBackdropFade 0.18s ease;
+}
+.docs-shell--open .docs-shell__backdrop {
+  display: block;
+}
+@keyframes docsBackdropFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 .docs-crumbs {
   font: 500 13px / 1 var(--pk-font-sans);
   display: flex;
@@ -615,8 +669,30 @@
   .docs-shell {
     grid-template-columns: 1fr;
   }
+  /* sidebar 改為 fixed drawer，預設位於畫面外 */
   .docs-sidebar {
-    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: min(280px, 80vw);
+    height: 100dvh;
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4);
+  }
+  .docs-shell--open .docs-sidebar {
+    transform: translateX(0);
+  }
+  .docs-topbar {
+    padding: 12px 16px;
+  }
+  .docs-topbar__menu {
+    display: inline-flex;
+  }
+  .docs-topbar__actions {
+    gap: 6px;
   }
   .docs-main__scroll {
     padding: 24px 20px;
@@ -629,5 +705,23 @@
   }
   .docs-playground__body {
     grid-template-columns: 1fr;
+  }
+}
+
+/* 更窄螢幕：buttons / crumbs 進一步緊湊 */
+@media (max-width: 480px) {
+  .docs-topbar {
+    padding: 10px 12px;
+  }
+  .docs-crumbs {
+    font-size: 12px;
+  }
+  .docs-seg button {
+    padding: 4px 8px;
+    min-width: 26px;
+    font-size: 11px;
+  }
+  .docs-main__scroll {
+    padding: 20px 14px;
   }
 }
