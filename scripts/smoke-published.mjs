@@ -114,7 +114,10 @@ try {
     ];
     const missing = games.filter((g) => !(g in m));
     assert(missing.length === 0, `missing games: ${missing.join(',')}`);
-    assert(typeof m.PlayKitProvider === 'function', `PlayKitProvider not function: ${typeof m.PlayKitProvider}`);
+    assert(
+      typeof m.PlayKitProvider === 'function',
+      `PlayKitProvider not function: ${typeof m.PlayKitProvider}`,
+    );
     assert(typeof m.useGameScale === 'function', 'useGameScale not function');
     assert(typeof m.useScalePolicy === 'function', 'useScalePolicy not function');
     assert(typeof m.useReducedMotion === 'function', 'useReducedMotion not function');
@@ -126,7 +129,10 @@ try {
 
   // ----- 3. ESM dynamic import -----
   const esmEntry =
-    installedPkg.exports?.['.']?.import ?? installedPkg.module ?? installedPkg.main ?? './dist/index.js';
+    installedPkg.exports?.['.']?.import ??
+    installedPkg.module ??
+    installedPkg.main ??
+    './dist/index.js';
   const pkgRoot = dirname(tempRequire.resolve('@play-kit/games/package.json'));
   const esmAbsPath = resolve(pkgRoot, esmEntry);
   await check('3. ESM dynamic import — components + hooks present', async () => {
@@ -147,7 +153,10 @@ try {
     assert(stat.isFile(), 'styles.css is not a file');
     assert(stat.size > 10000, `styles.css suspiciously small: ${stat.size} bytes`);
     const content = readFileSync(cssPath, 'utf8');
-    assert(content.includes('--pk-px'), 'styles.css missing --pk-px var (theme tokens not bundled?)');
+    assert(
+      content.includes('--pk-px'),
+      'styles.css missing --pk-px var (theme tokens not bundled?)',
+    );
     assert(content.includes('.pk-game'), 'styles.css missing .pk-game root selector');
   });
 

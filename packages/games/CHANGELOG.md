@@ -1,5 +1,31 @@
 # @play-kit/games
 
+## 0.2.2
+
+### Patch Changes
+
+- **docs/types: consumer DX 修補（無 runtime 行為改變）**
+
+  從 consumer 角度做完整 e2e DX review 後找到的 3 個 paper cut，全部是 docs/types 層級，consumer 無感升級即可拿到改進。
+
+  ### Fixed
+
+  - **`@play-kit/games/styles.css` 缺 type declaration**（TS strict 模式下 `import '@play-kit/games/styles.css'` 會 TS2882 "Cannot find module"）
+    - 新增 `dist/styles.css.d.ts`（空 module declaration）
+    - `exports['./styles.css']` 改為 `{ types, default }` 條件式，TS bundler/node resolution 都能找到
+  - **README events 對照表 17 款裡 12 款不準**（按 README 抄會 tsc fail）
+    - 改寫整張表，每款獨立列出實際簽章（以 `*Props` interface 為準）
+    - 標記 LuckyWheel 用 `LuckyWheelPrize`、NineGrid 用 `NineGridCell`、Marquee 用 `MarqueePrize`、SlotMachine 用 `symbols: number[]`、LottoRoll 用 `numbers: number[]`、ShakeDice 用 `(faces, sum)`、Quiz 只有 `score`（total 在 `onEnd`）、ScratchCard 沒有 `onWin`（用 `onReveal`）等正確簽章
+  - **README 缺非 bundler 環境的 CSS import 指引**
+    - 新增「測試環境（非 bundler runtime）」一節，說明 Vitest `css: true`、Jest `moduleNameMapper`、與「把 CSS import 抽到 app entry」三條解法
+    - Tsx / ts-node / Vitest 預設 / Jest 預設 import `@play-kit/games/styles.css` 會 `ERR_UNKNOWN_FILE_EXTENSION`，這個是 React library 共通限制，但 README 沒寫 → consumer 第一次踩會懵
+
+  ### Verification
+
+  - 在乾淨 consumer project（`/tmp/pk-smoke`）裡 README quickstart 範例 strict TS `tsc --noEmit` 通過、不需 ambient `declare module`
+  - 17 款 onWin/onClaim 簽章 README 與 d.ts 1:1 對齊
+  - smoke-published.mjs 6/6 pass
+
 ## 0.2.1
 
 ### Patch Changes

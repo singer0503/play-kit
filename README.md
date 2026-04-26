@@ -134,14 +134,27 @@ function App() {
 
 ## 🔌 事件回呼簽章對照
 
-各 game 的 `onWin` / `onClaim` 參數**按該 game 自身語意設計，並非全域統一**：
+各 game 的 `onWin` / `onClaim` 參數**按該 game 自身語意設計，並非全域統一**。下表以 `*Props` 型別為準（IDE 跳轉 / TS 自動完成都會看到一樣的東西）：
 
-| Game | `onWin` | `onClaim` |
-|---|---|---|
-| `LuckyWheel` · `NineGrid` · `ScratchCard` · `SmashEgg` · `SlotMachine` · `LottoRoll` · `GiftBox` · `GiftRain` · `GuessGift` · `DollMachine` · `Marquee` · `DailyCheckin` | `(prize: Prize)` | `(prize: Prize)` |
-| `FlipMatch` | `(moves: number, timeSec: number)` | — |
-| `Quiz` | `(score: number, total: number)` | — |
-| `RingToss` · `ShakeDice` · `Shake` | `(score: number)` | — |
+| Game | `onWin` | `onClaim` | 備註 |
+|---|---|---|---|
+| `LuckyWheel` | `(prize: LuckyWheelPrize)` | `(prize: LuckyWheelPrize)` | LuckyWheelPrize extends Prize（多 `weight`） |
+| `NineGrid` | `(prize: NineGridCell)` | `(prize: NineGridCell)` | NineGridCell ≈ Prize + 格子位置 |
+| `ScratchCard` | — | `(prize: Prize)` | 揭曉用 `onReveal(prize)`；`onClaim` 是領取 |
+| `SmashEgg` | `(prize: Prize)` | `(prize: Prize)` | |
+| `GiftBox` | `(prize: Prize)` | `(prize: Prize)` | |
+| `DollMachine` | `(prize: Prize)` | `(prize: Prize)` | |
+| `Marquee` | `(prize: MarqueePrize)` | `(prize: MarqueePrize)` | |
+| `SlotMachine` | `(symbols: readonly number[])` | `(symbols: readonly number[])` | 三輪停下來的 symbol index |
+| `LottoRoll` | `(numbers: readonly number[])` | `(numbers: readonly number[])` | 抽中的號碼 |
+| `ShakeDice` | `(faces: readonly number[], sum: number)` | `(faces, sum)` | 各骰面 + 加總 |
+| `FlipMatch` | `(moves: number, timeSec: number)` | `(moves, timeSec)` | |
+| `Quiz` | `(score: number)` | `(score: number)` | total 在 `onEnd(score, total, won)` |
+| `RingToss` | `(hits: number)` | `(hits: number)` | |
+| `GiftRain` | `(score: number)` | `(score: number)` | |
+| `DailyCheckin` | `(totalPoints: number)` | `(totalPoints: number)` | |
+| `GuessGift` | `()` | `()` | 結果由 game 自身 state 決定 |
+| `Shake` | `()` | `()` | 同上 |
 
 完整 props / events 表 → [docs site events 區塊](https://play-kit-doc.bwinify.com)。
 
@@ -230,6 +243,30 @@ function App() {
 | Remix / React Router | ✅ |
 | Astro（React island） | ✅ |
 | 任何 React 18+ 環境 | ✅（零 runtime 依賴 + 全 SSR-safe） |
+
+---
+
+## 🧪 測試環境（非 bundler runtime）
+
+`import '@play-kit/games/styles.css'` 是 CSS side-effect import — Vite/Next/Webpack 等 bundler 都會處理；但純 Node runtime（`tsx`、`ts-node`、Jest 預設、Vitest 沒開 `css`）會 `ERR_UNKNOWN_FILE_EXTENSION`。
+
+各 runtime 應對：
+
+```ts
+// Vitest — vitest.config.ts
+export default defineConfig({
+  test: { css: true },              // ← 內建支援
+});
+
+// Jest — jest.config.js
+module.exports = {
+  moduleNameMapper: {
+    '\\.css$': '<rootDir>/test/css-stub.js',  // ← stub 檔內容：module.exports = {};
+  },
+};
+```
+
+**最簡單的辦法**：把 `import '@play-kit/games/styles.css'` 從 component 抽到應用程式 entry（`main.tsx` / `_app.tsx`），測試用的 component 檔不直接 import CSS。`renderToString` / `render` 不需要 CSS 載入即可驗 HTML 結構與 a11y。
 
 ---
 
