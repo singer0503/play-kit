@@ -725,30 +725,8 @@
     padding: 20px 14px;
   }
   /*
-   * Game demo 在窄螢幕的 fallback。
-   * 各 game 的「機器」內層元件設計時鎖死 320~360px 像素（為了視覺校準
-   * canvas / wheel / slot 的 reel 等），無法純 CSS percentage 縮放。
-   * 在此先用：
-   *   - overflow-x: auto 允許橫滑，game 不會被裁切
-   *   - flex 置中 + scroll-padding，避免太貼邊
-   * v0.2.0 規劃 per-game RWD 改造。
+   * v0.2.0 起：17 款 game 透過 useGameScale + --pk-px 自己 RWD，
+   * 此處不再需要 .docs-stage transform: scale / overflow-x patch。
+   * 移除歷史背景見 git log: feat(rwd) Phase E。
    */
-  .docs-stage {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scroll-padding: 16px;
-    display: flex;
-    justify-content: center;
-  }
-  .docs-stage > .pk-game {
-    flex-shrink: 0;
-  }
-}
-
-/* iPhone SE / 老 Android (~360px)：再縮 8% 視覺 fit */
-@media (max-width: 380px) {
-  .docs-stage > .pk-game {
-    transform: scale(0.92);
-    transform-origin: top center;
-  }
 }
