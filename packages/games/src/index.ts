@@ -27,5 +27,7 @@ export * from './games/shake-dice';
 export * from './games/slot-machine';
 export * from './games/smash-egg';
 
-// 隨 library 預設匯入 CSS（vite-plugin-lib-inject-css 會處理）
+// 帶入 theme tokens + core primitives；vite 在 library build 把所有 CSS 合併到 dist/styles.css
+// 沒有 vite-plugin-lib-inject-css 時，這個 import 不會被寫進 JS bundle，純做 CSS 收集 trigger
+// Consumer 還是要顯式 `import '@play-kit/games/styles.css'`（README 的標準寫法）
 import './styles.css';

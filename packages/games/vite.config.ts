@@ -2,15 +2,13 @@ import { resolve } from 'node:path';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
-import { libInjectCss } from 'vite-plugin-lib-inject-css';
 
 // @play-kit/games 以 library mode 產出 ESM + CJS + 單一 d.ts。
-// CSS 由 vite-plugin-lib-inject-css 在各個 chunk 頂端 import，
-// 使用者 import 任意 game 都會自動拿到樣式。
+// CSS 以獨立 dist/index.css 發佈；consumer 顯式 `import '@play-kit/games/styles.css'`
+// （vite-plugin-lib-inject-css 會在 CJS 注入 require('./index.css')，純 Node 不可解，已棄用）
 export default defineConfig({
   plugins: [
     react(),
-    libInjectCss(),
     dts({
       rollupTypes: true,
       tsconfigPath: './tsconfig.build.json',

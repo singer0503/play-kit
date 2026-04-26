@@ -1,6 +1,6 @@
 {
   "name": "@play-kit/games",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "17 React mini-games (lucky wheel, scratch card, nine-grid, slot machine, ...) with 6-state machines, a11y, SSR-safe, zero non-peer deps.",
   "keywords": [
     "react",
@@ -41,7 +41,7 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./styles.css": "./dist/index.css",
+    "./styles.css": "./dist/styles.css",
     "./package.json": "./package.json"
   },
   "files": ["dist", "README.md", "CHANGELOG.md", "LICENSE"],
@@ -77,7 +77,6 @@
     "typescript": "^5.5.4",
     "vite": "^5.4.8",
     "vite-plugin-dts": "^4.2.3",
-    "vite-plugin-lib-inject-css": "^2.1.1",
     "vitest": "^2.1.2"
   }
 }
