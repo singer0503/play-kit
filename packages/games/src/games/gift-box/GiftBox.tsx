@@ -16,9 +16,10 @@ import { resolveLocalized } from '../../core/i18n-utils';
 import { StateBadge } from '../../core/state-badge';
 import type { GameState } from '../../core/types';
 import { useControlled } from '../../core/use-controlled';
+import { useGameScale } from '../../core/use-game-scale';
 import { useLatestRef } from '../../core/use-latest-ref';
 import { useReducedMotion } from '../../core/use-reduced-motion';
-import { useI18n } from '../../i18n/provider';
+import { useI18n, useScalePolicy } from '../../i18n/provider';
 import type { GiftBoxProps, GiftBoxRef } from './types';
 import './gift-box.css';
 
@@ -43,6 +44,8 @@ export const GiftBox = forwardRef<GiftBoxRef, GiftBoxProps>(function GiftBox(
   ref,
 ) {
   const { t, lang } = useI18n();
+  const scalePolicy = useScalePolicy();
+  const scaleRef = useGameScale<HTMLElement>(420, { enabled: scalePolicy === 'auto' });
   const reducedMotion = useReducedMotion();
 
   const [state, setState] = useControlled<GameState>({
@@ -134,6 +137,7 @@ export const GiftBox = forwardRef<GiftBoxRef, GiftBoxProps>(function GiftBox(
 
   return (
     <section
+      ref={scaleRef}
       {...rest}
       id={id}
       style={style}
