@@ -60,7 +60,21 @@ export function useGameScale<T extends HTMLElement = HTMLElement>(
     const parent = el.parentElement;
     if (!parent) return;
 
+    // 防回饋循環：若 parent 自己也是 content-sized（如 docs StateMatrix
+    // 的 transform: scale wrapper），game 縮會讓 parent 也縮，RO 再 fire
+    // → 慢速振盪。記住已套用的 width，新觀察值差距 < 1px 視為自己變動的
+    // 回饋、忽略。真實 layout 變化（window resize）通常差很多 px、會通過。
+    let lastAppliedWidth = -1;
+    const FEEDBACK_THRESHOLD_PX = 1;
+
     const apply = (parentWidth: number) => {
+      if (
+        lastAppliedWidth >= 0 &&
+        Math.abs(parentWidth - lastAppliedWidth) < FEEDBACK_THRESHOLD_PX
+      ) {
+        return;
+      }
+      lastAppliedWidth = parentWidth;
       const scale = parentWidth > 0 ? Math.min(1, parentWidth / designWidth) : 1;
       el.style.setProperty('--pk-scale', String(scale));
     };

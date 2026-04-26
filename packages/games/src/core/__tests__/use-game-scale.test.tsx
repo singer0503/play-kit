@@ -168,6 +168,31 @@ describe('useGameScale', () => {
     expect(() => render(<TestComp />)).not.toThrow();
   });
 
+  it('防回饋循環：parent 寬度變化 < 1px 視為自己造成的回饋、忽略', () => {
+    const { getByTestId } = render(<TestComp designWidth={400} />);
+    const el = getByTestId('root');
+    const ro = MockResizeObserver.last();
+    if (!ro) return;
+
+    // 首次 trigger：應用
+    act(() => {
+      ro.trigger(200);
+    });
+    expect(el.style.getPropertyValue('--pk-scale')).toBe('0.5');
+
+    // 微小變動（0.5px 內）：忽略，不更新 inline style
+    act(() => {
+      ro.trigger(199.7);
+    });
+    expect(el.style.getPropertyValue('--pk-scale')).toBe('0.5'); // unchanged
+
+    // 真實 layout 變動（≥ 1px 差距）：通過
+    act(() => {
+      ro.trigger(180);
+    });
+    expect(el.style.getPropertyValue('--pk-scale')).toBe('0.45');
+  });
+
   it('designWidth 改變：deps 觸發 effect re-run（重新觀察）', () => {
     const { rerender } = render(<TestComp designWidth={300} />);
     const firstRo = MockResizeObserver.last();
