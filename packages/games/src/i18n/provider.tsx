@@ -61,16 +61,24 @@ export interface PlayKitProviderProps extends HTMLAttributes<HTMLDivElement> {
  * 未包 provider 時，game 仍可運作（fallback 到英文 + 預設 nocturne theme）。
  */
 export function PlayKitProvider({
-  lang = 'zh-TW',
+  lang,
   theme,
-  scale = 'auto',
+  scale,
   wrap,
   children,
   className,
   ...rest
 }: PlayKitProviderProps) {
+  // 巢狀 Provider 友善：未指定 prop 時繼承外層 context（最終 fallback 才預設）。
+  // 用途：StateMatrix 等 thumbnail 場景包一層 `<PlayKitProvider scale="off">`
+  // 想關閉縮放、但保留外層的 lang / theme。
+  const outerI18n = useContext(I18nContext);
+  const outerScale = useContext(ScalePolicyContext);
+  const effectiveLang: Lang = lang ?? outerI18n?.lang ?? 'zh-TW';
+  const effectiveScale: ScalePolicy = scale ?? outerScale ?? 'auto';
+
   const value = useMemo<I18nContextValue>(() => {
-    const dict = DICTS[lang] ?? en;
+    const dict = DICTS[effectiveLang] ?? en;
     const t: TranslateFn = (key, params) => {
       const raw = dict[key] ?? (en as Record<string, string>)[key] ?? key;
       if (!params) return raw;
@@ -78,11 +86,11 @@ export function PlayKitProvider({
         k in params ? String(params[k]) : `{${k}}`,
       );
     };
-    return { lang, t };
-  }, [lang]);
+    return { lang: effectiveLang, t };
+  }, [effectiveLang]);
 
   const node = (
-    <ScalePolicyContext.Provider value={scale}>
+    <ScalePolicyContext.Provider value={effectiveScale}>
       <I18nContext.Provider value={value}>{children}</I18nContext.Provider>
     </ScalePolicyContext.Provider>
   );
