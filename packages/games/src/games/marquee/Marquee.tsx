@@ -16,10 +16,11 @@ import { resolveLocalized } from '../../core/i18n-utils';
 import { StateBadge } from '../../core/state-badge';
 import type { GameState } from '../../core/types';
 import { useControlled } from '../../core/use-controlled';
+import { useGameScale } from '../../core/use-game-scale';
 import { useLatestRef } from '../../core/use-latest-ref';
 import { pickPrize } from '../../core/use-prize';
 import { useReducedMotion } from '../../core/use-reduced-motion';
-import { useI18n } from '../../i18n/provider';
+import { useI18n, useScalePolicy } from '../../i18n/provider';
 import type { MarqueePrize, MarqueeProps, MarqueeRef } from './types';
 import './marquee.css';
 
@@ -50,6 +51,8 @@ export const Marquee = forwardRef<MarqueeRef, MarqueeProps>(function Marquee(
   ref,
 ) {
   const { t, lang } = useI18n();
+  const scalePolicy = useScalePolicy();
+  const scaleRef = useGameScale<HTMLElement>(412, { enabled: scalePolicy === 'auto' });
   const reducedMotion = useReducedMotion();
 
   const [state, setState] = useControlled<GameState>({
@@ -192,6 +195,7 @@ export const Marquee = forwardRef<MarqueeRef, MarqueeProps>(function Marquee(
 
   return (
     <section
+      ref={scaleRef}
       {...rest}
       id={id}
       style={style}

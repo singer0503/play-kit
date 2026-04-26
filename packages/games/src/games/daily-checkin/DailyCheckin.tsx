@@ -7,9 +7,10 @@ import { haptic } from '../../core/haptic';
 import { StateBadge } from '../../core/state-badge';
 import type { GameState } from '../../core/types';
 import { useControlled } from '../../core/use-controlled';
+import { useGameScale } from '../../core/use-game-scale';
 import { useLatestRef } from '../../core/use-latest-ref';
 import { useReducedMotion } from '../../core/use-reduced-motion';
-import { useI18n } from '../../i18n/provider';
+import { useI18n, useScalePolicy } from '../../i18n/provider';
 import type { DailyCheckinProps, DailyCheckinRef } from './types';
 import './daily-checkin.css';
 
@@ -42,6 +43,8 @@ export const DailyCheckin = forwardRef<DailyCheckinRef, DailyCheckinProps>(funct
   ref,
 ) {
   const { t } = useI18n();
+  const scalePolicy = useScalePolicy();
+  const scaleRef = useGameScale<HTMLElement>(400, { enabled: scalePolicy === 'auto' });
   const reducedMotion = useReducedMotion();
 
   const [state, setState] = useControlled<GameState>({
@@ -136,6 +139,7 @@ export const DailyCheckin = forwardRef<DailyCheckinRef, DailyCheckinProps>(funct
 
   return (
     <section
+      ref={scaleRef}
       {...rest}
       id={id}
       style={style}
