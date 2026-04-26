@@ -101,11 +101,22 @@ export const SlotMachine = forwardRef<SlotMachineRef, SlotMachineProps>(function
 
   useEffect(() => () => stopAllTimers(), [stopAllTimers]);
 
+  // RWD scale 同步：CSS 把 .pk-slot__sym 的 height 乘 --pk-scale，
+  // 為了 strip 的 translateY 視覺上同步，JS 寫 transform 前讀目前 scale 乘上去。
+  // scale<1（窄容器）時：design-space px × scale = visual-space px。
+  const readScale = useCallback((): number => {
+    const cur = scaleRef.current?.style.getPropertyValue('--pk-scale');
+    if (!cur) return 1;
+    const v = Number.parseFloat(cur);
+    return Number.isFinite(v) && v > 0 ? v : 1;
+  }, [scaleRef]);
+
   // rAF 由 useAnimationLoop 代為處理 cleanup / SSR guard；symbols 連續由下往上滑過 viewport
   useAnimationLoop({
     enabled: spinningFlags.some(Boolean),
     reducedMotion,
     onFrame: (dt) => {
+      const scale = readScale();
       for (let i = 0; i < spinningFlags.length; i++) {
         if (!spinningFlags[i]) continue;
         let next = (offsetsRef.current[i] ?? 0) - dt * SPIN_PX_PER_MS;
@@ -115,7 +126,7 @@ export const SlotMachine = forwardRef<SlotMachineRef, SlotMachineProps>(function
         const el = stripsRef.current[i];
         if (el) {
           el.style.transition = 'none';
-          el.style.transform = `translateY(${next}px)`;
+          el.style.transform = `translateY(${next * scale}px)`;
         }
       }
     },
@@ -196,9 +207,10 @@ export const SlotMachine = forwardRef<SlotMachineRef, SlotMachineProps>(function
             const k =
               minTotal +
               ((finalSym - (minTotal % symbols.length) + symbols.length) % symbols.length);
-            const finalY = -k * SYMBOL_H; // 整數倍 × 72px，保證對齊 viewport
+            const finalY = -k * SYMBOL_H; // 整數倍 × 72px，保證對齊 viewport（design space）
+            const scale = readScale();
             el.style.transition = `transform ${LAND_MS}ms cubic-bezier(0.15, 0.8, 0.3, 1)`;
-            el.style.transform = `translateY(${finalY}px)`;
+            el.style.transform = `translateY(${finalY * scale}px)`;
             offsetsRef.current[i] = finalY;
           }
           // 最後一個 reel 停下立刻 finalize（state=won/lost），CSS transition 在畫面繼續跑
@@ -219,6 +231,7 @@ export const SlotMachine = forwardRef<SlotMachineRef, SlotMachineProps>(function
       onStart,
       stopAllTimers,
       finalize,
+      readScale,
     ],
   );
 

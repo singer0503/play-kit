@@ -55,6 +55,12 @@ export function App() {
   useEffect(() => {
     setSidebarOpen(false);
   }, [route]);
+  // 切 game 時滾回頁面頂端，使用者才看得到預覽（而不是停留在前一頁底部的 props/events 表）
+  // biome-ignore lint/correctness/useExhaustiveDependencies: 故意在 route 變化時 retrigger
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [route]);
   // ESC 關閉 mobile drawer
   useEffect(() => {
     if (!sidebarOpen) return;
