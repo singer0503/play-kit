@@ -686,7 +686,19 @@
     transform: translateX(0);
   }
   .docs-topbar {
+    /* sticky 配合 backdrop-filter 在 iOS Safari 偶爾失效；mobile 改 fixed 確保
+     * 漢堡按鈕全程可見，使用者不需滾回頁頂才能切 game */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
     padding: 12px 16px;
+    /* fixed 後 backdrop-filter 必要，讓 topbar 半透明看起來自然 */
+    background: color-mix(in oklch, var(--pk-bg-0) 92%, transparent);
+  }
+  /* topbar 從 layout flow 抽走後，主要 scroll 區補上 topbar 高度的 padding-top */
+  .docs-main {
+    padding-top: 56px;
   }
   .docs-topbar__menu {
     display: inline-flex;
