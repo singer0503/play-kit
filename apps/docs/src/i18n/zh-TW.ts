@@ -45,5 +45,10 @@ export const zhTW: DocsStrings = {
       deps: '依賴',
     },
   },
+  resources: {
+    title: '資源',
+    examples: '範例',
+    github: 'GitHub',
+  },
   footer: '原創設計。不含任何第三方品牌素材。',
 };

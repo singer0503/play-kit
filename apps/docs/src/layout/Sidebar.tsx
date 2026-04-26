@@ -76,6 +76,29 @@ export function Sidebar({ route, lang }: { route: string; lang: DocsLang }) {
         );
       })}
 
+      {/* External resources：examples + GitHub */}
+      <div className="docs-navgroup">
+        <div className="docs-navgroup__label">{s.resources.title}</div>
+        <a
+          className="docs-navitem docs-navitem--external"
+          href="https://github.com/singer0503/play-kit/tree/main/examples"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span className="docs-navitem__dot" aria-hidden="true">↗</span>
+          <span>{s.resources.examples}</span>
+        </a>
+        <a
+          className="docs-navitem docs-navitem--external"
+          href="https://github.com/singer0503/play-kit"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span className="docs-navitem__dot" aria-hidden="true">↗</span>
+          <span>{s.resources.github}</span>
+        </a>
+      </div>
+
       <div className="docs-sidebar__foot">{s.footer}</div>
     </aside>
   );

@@ -44,6 +44,11 @@ export interface DocsStrings {
       deps: string;
     };
   };
+  resources: {
+    title: string;
+    examples: string;
+    github: string;
+  };
   footer: string;
 }
 
@@ -90,6 +95,11 @@ export const en: DocsStrings = {
       states: 'states',
       deps: 'deps',
     },
+  },
+  resources: {
+    title: 'Resources',
+    examples: 'Examples',
+    github: 'GitHub',
   },
   footer: 'Original designs. No third-party brand assets.',
 };
