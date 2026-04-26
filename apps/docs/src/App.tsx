@@ -1,5 +1,5 @@
 import { PlayKitProvider } from '@play-kit/games';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { DocsLangContext } from './i18n';
 import type { DocsLang } from './i18n';
 import { Sidebar } from './layout/Sidebar';
@@ -33,6 +33,9 @@ export function App() {
   const [lang, setLang] = useState<DocsLang>(readLang);
   const [route, setRoute] = useState<string>(readRoute);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  // 切 game 時 scroll-to-top 的 pending 旗標。route 變動時 set true、
+  // 真的執行完 scroll 後 clear。
+  const pendingScrollRef = useRef(false);
 
   // theme → <html data-theme> + persist
   useEffect(() => {
@@ -50,17 +53,24 @@ export function App() {
     window.addEventListener('hashchange', handler);
     return () => window.removeEventListener('hashchange', handler);
   }, []);
-  // 切 game / 切 home 時自動關 mobile drawer
-  // biome-ignore lint/correctness/useExhaustiveDependencies: 故意在 route 變化時 retrigger，effect 本身不讀 route
-  useEffect(() => {
-    setSidebarOpen(false);
-  }, [route]);
-  // 切 game 時滾回頁面頂端，使用者才看得到預覽（而不是停留在前一頁底部的 props/events 表）
+  // 切 game / 切 home 時自動關 mobile drawer + 標記 scroll pending
   // biome-ignore lint/correctness/useExhaustiveDependencies: 故意在 route 變化時 retrigger
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    setSidebarOpen(false);
+    pendingScrollRef.current = true;
   }, [route]);
+  // 等 drawer 真的關閉、body overflow 解鎖後，再 scroll 回頁頂。
+  // 直接在 route 變化時 scroll 會被 body overflow:hidden 擋住失效（mobile drawer 場景），
+  // 故拆成兩 effect：先關 drawer + 設 pending（上面那個），這個 effect 等
+  // sidebarOpen → false 後檢查 pending、執行 scroll、清旗標。
+  // 桌機 sidebar 永遠 false，pending 設了之後此 effect 立即觸發、scroll 馬上執行。
+  // biome-ignore lint/correctness/useExhaustiveDependencies: route 列入 dep 確保桌機切 game（sidebarOpen 不變）也會 retrigger 此 effect
+  useEffect(() => {
+    if (sidebarOpen || !pendingScrollRef.current) return;
+    if (typeof window === 'undefined') return;
+    pendingScrollRef.current = false;
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [route, sidebarOpen]);
   // ESC 關閉 mobile drawer
   useEffect(() => {
     if (!sidebarOpen) return;
