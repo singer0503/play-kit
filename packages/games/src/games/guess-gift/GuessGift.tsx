@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  type CSSProperties,
   forwardRef,
   useCallback,
   useEffect,
@@ -21,6 +22,20 @@ import { useReducedMotion } from '../../core/use-reduced-motion';
 import { useI18n, useScalePolicy } from '../../i18n/provider';
 import type { GuessGiftProps, GuessGiftRef } from './types';
 import './guess-gift.css';
+
+const MIN_CUP_COUNT = 2;
+const MAX_CUP_COUNT = 5;
+const TABLE_WIDTH = 360;
+const MAX_CUP_WIDTH = 80;
+const MIN_CUP_GAP = 8;
+
+function clampCupCount(cupCount: number): number {
+  return Math.min(MAX_CUP_COUNT, Math.max(MIN_CUP_COUNT, Math.round(cupCount)));
+}
+
+function toScaledLength(value: number): string {
+  return `calc(${Number(value.toFixed(4))} * var(--pk-px, 1px))`;
+}
 
 // slotOf[cupId] = 當前 cup 所在的 slot（0..cupCount-1）
 export const GuessGift = forwardRef<GuessGiftRef, GuessGiftProps>(function GuessGift(
@@ -55,6 +70,13 @@ export const GuessGift = forwardRef<GuessGiftRef, GuessGiftProps>(function Guess
   const scalePolicy = useScalePolicy();
   const scaleRef = useGameScale<HTMLElement>(400, { enabled: scalePolicy === 'auto' });
   const reducedMotion = useReducedMotion();
+  const effectiveCupCount = clampCupCount(cupCount);
+  const cupWidth = Math.min(
+    MAX_CUP_WIDTH,
+    (TABLE_WIDTH - MIN_CUP_GAP * (effectiveCupCount + 1)) / effectiveCupCount,
+  );
+  const cupGap = (TABLE_WIDTH - cupWidth * effectiveCupCount) / (effectiveCupCount + 1);
+  const cupHeight = cupWidth * 1.25;
 
   const [state, setState] = useControlled<GameState>({
     controlled: stateProp,
@@ -68,9 +90,11 @@ export const GuessGift = forwardRef<GuessGiftRef, GuessGiftProps>(function Guess
   });
 
   const [slotOf, setSlotOf] = useState<number[]>(() =>
-    Array.from({ length: cupCount }, (_, i) => i),
+    Array.from({ length: effectiveCupCount }, (_, i) => i),
   );
-  const [ballCup, setBallCup] = useState(0);
+  const [ballCup, setBallCup] = useState(() =>
+    ballCupIndex >= 0 && ballCupIndex < effectiveCupCount ? ballCupIndex : 0,
+  );
   const [showBall, setShowBall] = useState(true);
   const [animating, setAnimating] = useState(false);
   const [pickedSlot, setPickedSlot] = useState<number | null>(null);
@@ -81,7 +105,6 @@ export const GuessGift = forwardRef<GuessGiftRef, GuessGiftProps>(function Guess
   const revealTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const stateRef = useLatestRef(state);
 
-  const SLOT_WIDTH = 96; // 80 cup + 16 gap
   const stopTimers = useCallback(() => {
     if (swapTimerRef.current) clearTimeout(swapTimerRef.current);
     if (revealTimerRef.current) clearTimeout(revealTimerRef.current);
@@ -91,15 +114,23 @@ export const GuessGift = forwardRef<GuessGiftRef, GuessGiftProps>(function Guess
 
   useEffect(() => () => stopTimers(), [stopTimers]);
 
+  useEffect(() => {
+    if (state !== 'idle') return;
+    setSlotOf(Array.from({ length: effectiveCupCount }, (_, i) => i));
+    setBallCup(ballCupIndex >= 0 && ballCupIndex < effectiveCupCount ? ballCupIndex : 0);
+    setShowBall(true);
+    setPickedSlot(null);
+  }, [effectiveCupCount, ballCupIndex, state]);
+
   const start = useCallback(() => {
     if (state === 'playing' || state === 'claimed' || state === 'cooldown') return;
     if (remaining <= 0) return;
     const initialBallCup =
-      ballCupIndex >= 0 && ballCupIndex < cupCount
+      ballCupIndex >= 0 && ballCupIndex < effectiveCupCount
         ? ballCupIndex
-        : Math.floor(Math.random() * cupCount);
+        : Math.floor(Math.random() * effectiveCupCount);
     setBallCup(initialBallCup);
-    setSlotOf(Array.from({ length: cupCount }, (_, i) => i));
+    setSlotOf(Array.from({ length: effectiveCupCount }, (_, i) => i));
     setShowBall(true);
     setPickedSlot(null);
     setState('playing');
@@ -116,15 +147,17 @@ export const GuessGift = forwardRef<GuessGiftRef, GuessGiftProps>(function Guess
     revealTimerRef.current = setTimeout(() => setShowBall(false), revealMs);
 
     // 用 ref 追 slotOf，避免在 setSlotOf updater 裡呼 setSwapping（Strict Mode double-fire）
-    const slotOfRef = { current: Array.from({ length: cupCount }, (_, i) => i) };
+    const slotOfRef = {
+      current: Array.from({ length: effectiveCupCount }, (_, i) => i),
+    };
     let swaps = 0;
     const doSwap = () => {
       // 受控 state 被外部翻回 idle/claimed 時立即中止 swap 遞迴
       if (stateRef.current !== 'playing') return;
       const cur = slotOfRef.current;
-      const a = Math.floor(Math.random() * cupCount);
-      let b = Math.floor(Math.random() * cupCount);
-      while (b === a) b = Math.floor(Math.random() * cupCount);
+      const a = Math.floor(Math.random() * effectiveCupCount);
+      let b = Math.floor(Math.random() * effectiveCupCount);
+      while (b === a) b = Math.floor(Math.random() * effectiveCupCount);
       const cupA = cur.findIndex((s) => s === a);
       const cupB = cur.findIndex((s) => s === b);
       if (cupA !== -1 && cupB !== -1) {
@@ -150,7 +183,7 @@ export const GuessGift = forwardRef<GuessGiftRef, GuessGiftProps>(function Guess
   }, [
     state,
     remaining,
-    cupCount,
+    effectiveCupCount,
     swapCount,
     swapDurationMs,
     revealMs,
@@ -163,7 +196,7 @@ export const GuessGift = forwardRef<GuessGiftRef, GuessGiftProps>(function Guess
   const pick = useCallback(
     (slot: number) => {
       if (state !== 'playing' || animating || pickedSlot !== null) return;
-      if (slot < 0 || slot >= cupCount) return;
+      if (slot < 0 || slot >= effectiveCupCount) return;
       const cupId = slotOf.findIndex((s) => s === slot);
       const correct = cupId === ballCup;
       setPickedSlot(slot);
@@ -183,7 +216,7 @@ export const GuessGift = forwardRef<GuessGiftRef, GuessGiftProps>(function Guess
       state,
       animating,
       pickedSlot,
-      cupCount,
+      effectiveCupCount,
       slotOf,
       ballCup,
       remaining,
@@ -198,12 +231,12 @@ export const GuessGift = forwardRef<GuessGiftRef, GuessGiftProps>(function Guess
 
   const reset = useCallback(() => {
     stopTimers();
-    setSlotOf(Array.from({ length: cupCount }, (_, i) => i));
+    setSlotOf(Array.from({ length: effectiveCupCount }, (_, i) => i));
     setShowBall(true);
     setAnimating(false);
     setPickedSlot(null);
     setState('idle');
-  }, [cupCount, setState, stopTimers]);
+  }, [effectiveCupCount, setState, stopTimers]);
 
   const claim = useCallback(() => {
     if (state !== 'won') return;
@@ -240,13 +273,21 @@ export const GuessGift = forwardRef<GuessGiftRef, GuessGiftProps>(function Guess
               : '';
 
   const pickedCupId = pickedSlot !== null ? slotOf.findIndex((s) => s === pickedSlot) : null;
+  const rootStyle = {
+    ...style,
+    '--pk-gg-cup-width': toScaledLength(cupWidth),
+    '--pk-gg-cup-height': toScaledLength(cupHeight),
+    '--pk-gg-wrapper-height': toScaledLength(cupHeight + 10),
+    '--pk-gg-lift-distance': toScaledLength(-cupHeight * 0.56),
+    '--pk-gg-swap-duration': `${Math.max(0, swapDurationMs)}ms`,
+  } as CSSProperties;
 
   return (
     <section
       ref={scaleRef}
       {...rest}
       id={id}
-      style={style}
+      style={rootStyle}
       className={['pk-game', 'pk-gg', className].filter(Boolean).join(' ')}
       aria-label={ariaLabel ?? t('guessGift.title')}
     >
@@ -261,27 +302,31 @@ export const GuessGift = forwardRef<GuessGiftRef, GuessGiftProps>(function Guess
       </div>
       <div className="pk-gg__hint">{hint}</div>
       <div className="pk-gg__table">
-        {Array.from({ length: cupCount }, (_, slot) => (
-          <button
-            type="button"
-            // biome-ignore lint/suspicious/noArrayIndexKey: slot 位置固定
-            key={slot}
-            className="pk-gg__slot"
-            style={{ left: `${20 + slot * SLOT_WIDTH}px` }}
-            onClick={() => pick(slot)}
-            disabled={state !== 'playing' || animating || pickedSlot !== null}
-            aria-label={t('guessGift.cupLabel', { index: slot + 1 })}
-          />
-        ))}
-        {Array.from({ length: cupCount }, (_, cupId) => {
+        {Array.from({ length: effectiveCupCount }, (_, slot) => {
+          const x = cupGap + slot * (cupWidth + cupGap);
+          return (
+            <button
+              type="button"
+              // biome-ignore lint/suspicious/noArrayIndexKey: slot 位置固定
+              key={slot}
+              className="pk-gg__slot"
+              style={{ left: toScaledLength(x) }}
+              onClick={() => pick(slot)}
+              disabled={state !== 'playing' || animating || pickedSlot !== null}
+              aria-label={t('guessGift.cupLabel', { index: slot + 1 })}
+            />
+          );
+        })}
+        {Array.from({ length: effectiveCupCount }, (_, cupId) => {
           const slot = slotOf[cupId] ?? cupId;
-          const x = 20 + slot * SLOT_WIDTH;
+          const x = cupGap + slot * (cupWidth + cupGap);
           const lifted = pickedCupId === cupId;
           const hasBall = cupId === ballCup;
           const arcOver = swapping?.[0] === cupId;
           const arcUnder = swapping?.[1] === cupId;
           const wrapCls = [
             'pk-gg__cup-wrap',
+            animating ? 'pk-gg__cup-wrap--moving' : '',
             lifted ? 'pk-gg__cup-wrap--lifted' : '',
             arcOver ? 'pk-gg__cup-wrap--arc-over' : '',
             arcUnder ? 'pk-gg__cup-wrap--arc-under' : '',
@@ -293,7 +338,7 @@ export const GuessGift = forwardRef<GuessGiftRef, GuessGiftProps>(function Guess
               // biome-ignore lint/suspicious/noArrayIndexKey: cup 身分由 cupId 固定
               key={cupId}
               className={wrapCls}
-              style={{ transform: `translateX(${x}px)` }}
+              style={{ transform: `translateX(${toScaledLength(x)})` }}
               aria-hidden="true"
             >
               <div className="pk-gg__cup">

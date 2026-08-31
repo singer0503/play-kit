@@ -102,4 +102,21 @@ describe('LuckyWheel — ref API', () => {
     expect(onEnd).not.toHaveBeenCalled();
     expect(ref.current?.getState()).toBe('idle');
   });
+
+  it('第二次 spin 仍以指針為基準落到指定扇區', () => {
+    const ref = createRef<LuckyWheelRef>();
+    const { container } = render(
+      <LuckyWheel ref={ref} prizes={demoPrizes} defaultRemaining={2} />,
+      { wrapper: Wrapper },
+    );
+
+    act(() => ref.current?.spin(0));
+    act(() => vi.advanceTimersByTime(5000));
+    act(() => ref.current?.reset());
+    act(() => ref.current?.spin(1));
+
+    const transform = container.querySelector<SVGSVGElement>('.pk-lw__svg')?.style.transform ?? '';
+    const angle = Number.parseFloat(transform.match(/rotate\(([-\d.]+)deg\)/)?.[1] ?? 'NaN');
+    expect(((angle % 360) + 360) % 360).toBeCloseTo(292.5);
+  });
 });

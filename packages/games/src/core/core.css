@@ -111,10 +111,23 @@
    `--pk-scale` 由 `useGameScale` hook 寫到 inline style，預設 fallback 為 1。
    內層所有 scalable 像素用 `calc(N * var(--pk-px))` 表達。
 */
+.pk-game,
+.pk-game *,
+.pk-game *::before,
+.pk-game *::after {
+  box-sizing: border-box;
+}
+
 .pk-game {
   position: relative;
   isolation: isolate;
+  min-width: 0;
+  -webkit-tap-highlight-color: transparent;
   --pk-px: calc(1px * var(--pk-scale, 1));
+}
+
+.pk-game button {
+  touch-action: manipulation;
 }
 
 /* ---------- Plate（機身外框，所有 game 的 chassis 可直接套用） ---------- */

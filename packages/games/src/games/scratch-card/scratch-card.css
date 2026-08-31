@@ -93,6 +93,10 @@
   color: oklch(0.22 0.05 60);
 }
 .pk-sc__amount {
+  max-width: calc(280 * var(--pk-px, 1px));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font: 700 calc(48 * var(--pk-px, 1px)) / 1 var(--pk-font-display);
   letter-spacing: -0.02em;
   color: oklch(0.15 0.03 60);

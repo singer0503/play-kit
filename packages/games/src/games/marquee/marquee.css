@@ -35,6 +35,8 @@
   gap: calc(8 * var(--pk-px, 1px));
 }
 .pk-mq__cell {
+  min-width: 0;
+  overflow: hidden;
   background: var(--pk-bg-ink);
   border: 1px solid var(--pk-border);
   border-radius: var(--pk-r-md);
@@ -49,6 +51,11 @@
   font-size: calc(28 * var(--pk-px, 1px));
 }
 .pk-mq__cell-label {
+  width: 100%;
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font: 500 calc(11 * var(--pk-px, 1px)) / 1 var(--pk-font-mono);
   color: var(--pk-fg-2);
 }

@@ -76,4 +76,30 @@ describe('ShakeDice — state machine', () => {
     act(() => ref.current?.roll());
     expect(ref.current?.getState()).toBe('won');
   });
+
+  it('7–12 面骰以數字顯示，不會出現空白骰面', () => {
+    const ref = createRef<ShakeDiceRef>();
+    const { container } = render(<ShakeDice ref={ref} faces={12} forcedFaces={[8, 8, 8]} />, {
+      wrapper: Wrapper,
+    });
+    act(() => ref.current?.roll());
+    act(() => vi.advanceTimersByTime(2000));
+    const faces = container.querySelectorAll('.pk-sd__face-number');
+    expect(faces).toHaveLength(3);
+    for (const face of faces) expect(face).toHaveTextContent('8');
+  });
+
+  it('五顆骰子使用動態尺寸且保持在同一列', () => {
+    const { container } = render(<ShakeDice diceCount={5} />, { wrapper: Wrapper });
+    const root = container.querySelector<HTMLElement>('.pk-sd');
+    expect(container.querySelectorAll('.pk-sd__die')).toHaveLength(5);
+    expect(root?.style.getPropertyValue('--pk-sd-die-size')).toContain('var(--pk-px');
+  });
+
+  it('lost 狀態只顯示單一再試一次動作', () => {
+    const { container } = render(<ShakeDice state="lost" />, { wrapper: Wrapper });
+    const actions = container.querySelectorAll('.pk-sd__cta button');
+    expect(actions).toHaveLength(1);
+    expect(actions[0]).toHaveTextContent('Try again');
+  });
 });

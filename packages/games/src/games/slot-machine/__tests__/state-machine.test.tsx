@@ -63,4 +63,17 @@ describe('SlotMachine — state machine', () => {
     act(() => ref.current?.spin());
     expect(ref.current?.getState()).toBe('won');
   });
+
+  it('等待所有 reel 的自訂 stop time 與落定動畫完成後才結算', () => {
+    const ref = createRef<SlotMachineRef>();
+    render(<SlotMachine ref={ref} forcedSymbols={[2, 2, 2]} stopTimes={[2400, 200, 600]} />, {
+      wrapper: Wrapper,
+    });
+
+    act(() => ref.current?.spin());
+    act(() => vi.advanceTimersByTime(2999));
+    expect(ref.current?.getState()).toBe('playing');
+    act(() => vi.advanceTimersByTime(1));
+    expect(ref.current?.getState()).toBe('won');
+  });
 });

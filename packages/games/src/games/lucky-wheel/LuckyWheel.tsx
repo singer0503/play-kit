@@ -26,8 +26,16 @@ import type { LuckyWheelPrize, LuckyWheelProps, LuckyWheelRef } from './types';
 import './lucky-wheel.css';
 
 const BULB_COUNT = 16;
+const BOARD_SIZE = 340;
+const BULB_RADIUS = 160;
+const BULB_SIZE = 10;
 /** LuckyWheel 設計基準寬：board 340 + 周邊 padding，整體 max ≈ 372。useGameScale 用此計算窄容器 scale。 */
 const DESIGN_WIDTH = 372;
+
+function truncateWheelLabel(label: string, maxLength = 9): string {
+  const glyphs = Array.from(label);
+  return glyphs.length > maxLength ? `${glyphs.slice(0, maxLength - 1).join('')}…` : label;
+}
 
 export const LuckyWheel = forwardRef<LuckyWheelRef, LuckyWheelProps>(function LuckyWheel(
   {
@@ -81,9 +89,12 @@ export const LuckyWheel = forwardRef<LuckyWheelRef, LuckyWheelProps>(function Lu
   const [bulbPhase, setBulbPhase] = useState(0);
 
   const liveRegionId = useId();
+  const svgIdPrefix = `pk-lw-${liveRegionId.replace(/[^a-zA-Z0-9_-]/g, '')}`;
+  const hubGradientId = `${svgIdPrefix}-hub-gradient`;
+  const pointerGradientId = `${svgIdPrefix}-pointer-gradient`;
   const spinTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const sliceAngle = 360 / prizes.length;
+  const sliceAngle = prizes.length > 0 ? 360 / prizes.length : 0;
 
   // bulb 位置在 mount 時算一次；每顆的 id 由極座標唯一決定（避免用 array index 當 key）
   const bulbLayout = useMemo(
@@ -93,8 +104,8 @@ export const LuckyWheel = forwardRef<LuckyWheelRef, LuckyWheelProps>(function Lu
         return {
           id: `bulb@${angleRad.toFixed(4)}`,
           idx: i,
-          left: `calc(50% + ${Math.cos(angleRad) * 160}px - 5px)`,
-          top: `calc(50% + ${Math.sin(angleRad) * 160}px - 5px)`,
+          left: `${50 + (Math.cos(angleRad) * BULB_RADIUS - BULB_SIZE / 2) / (BOARD_SIZE / 100)}%`,
+          top: `${50 + (Math.sin(angleRad) * BULB_RADIUS - BULB_SIZE / 2) / (BOARD_SIZE / 100)}%`,
         };
       }),
     [],
@@ -134,7 +145,7 @@ export const LuckyWheel = forwardRef<LuckyWheelRef, LuckyWheelProps>(function Lu
       const target = prizes[safeIndex];
       if (!target) return;
 
-      const finalRotation = 360 * 6 + (360 - safeIndex * sliceAngle - sliceAngle / 2);
+      const targetAngle = 360 - safeIndex * sliceAngle - sliceAngle / 2;
       setCurrentPrize(null);
       setState('playing');
       onStart?.();
@@ -142,7 +153,7 @@ export const LuckyWheel = forwardRef<LuckyWheelRef, LuckyWheelProps>(function Lu
 
       if (reducedMotion) {
         // 無動畫模式：直接跳到終態
-        setAngle(finalRotation);
+        setAngle(targetAngle);
         setCurrentPrize({ prize: target, index: safeIndex });
         setState(target.win ? 'won' : 'lost');
         setRemaining(remaining - 1);
@@ -156,7 +167,12 @@ export const LuckyWheel = forwardRef<LuckyWheelRef, LuckyWheelProps>(function Lu
         return;
       }
 
-      setAngle((a) => a + finalRotation);
+      setAngle((currentAngle) => {
+        const currentModulo = ((currentAngle % 360) + 360) % 360;
+        const targetModulo = ((targetAngle % 360) + 360) % 360;
+        const forwardDelta = (targetModulo - currentModulo + 360) % 360;
+        return currentAngle + 360 * 6 + forwardDelta;
+      });
       if (spinTimerRef.current) clearTimeout(spinTimerRef.current);
       spinTimerRef.current = setTimeout(() => {
         setCurrentPrize({ prize: target, index: safeIndex });
@@ -275,7 +291,7 @@ export const LuckyWheel = forwardRef<LuckyWheelRef, LuckyWheelProps>(function Lu
           aria-hidden="true"
         >
           <defs>
-            <radialGradient id="pk-lw-hub-grad" cx="50%" cy="40%">
+            <radialGradient id={hubGradientId} cx="50%" cy="40%">
               <stop offset="0%" stopColor="oklch(0.95 0.06 82)" />
               <stop offset="60%" stopColor="oklch(0.72 0.14 75)" />
               <stop offset="100%" stopColor="oklch(0.48 0.11 65)" />
@@ -295,6 +311,7 @@ export const LuckyWheel = forwardRef<LuckyWheelRef, LuckyWheelProps>(function Lu
             const ix = Math.cos(midA) * 82;
             const iy = Math.sin(midA) * 82;
             const labelText = resolveLocalized(p.label, lang);
+            const displayLabel = truncateWheelLabel(labelText);
             return (
               <g key={p.id ?? `${i}-${labelText}`}>
                 <path
@@ -314,7 +331,7 @@ export const LuckyWheel = forwardRef<LuckyWheelRef, LuckyWheelProps>(function Lu
                   fontFamily="var(--pk-font-display)"
                   transform={`rotate(${i * sliceAngle + sliceAngle / 2} ${tx} ${ty})`}
                 >
-                  {labelText}
+                  {displayLabel}
                 </text>
                 {p.icon ? (
                   <text
@@ -335,7 +352,7 @@ export const LuckyWheel = forwardRef<LuckyWheelRef, LuckyWheelProps>(function Lu
             cx="0"
             cy="0"
             r="26"
-            fill="url(#pk-lw-hub-grad)"
+            fill={`url(#${hubGradientId})`}
             stroke="oklch(0.48 0.11 65)"
             strokeWidth="1.5"
           />
@@ -344,14 +361,14 @@ export const LuckyWheel = forwardRef<LuckyWheelRef, LuckyWheelProps>(function Lu
         <div className="pk-lw__pointer" aria-hidden="true">
           <svg width="38" height="52" viewBox="0 0 38 52" aria-hidden="true">
             <defs>
-              <linearGradient id="pk-lw-pt-g" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id={pointerGradientId} x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0" stopColor="oklch(0.72 0.22 25)" />
                 <stop offset="1" stopColor="oklch(0.42 0.18 22)" />
               </linearGradient>
             </defs>
             <path
               d="M19 52 L3 12 Q19 -4 35 12 Z"
-              fill="url(#pk-lw-pt-g)"
+              fill={`url(#${pointerGradientId})`}
               stroke="oklch(0.82 0.14 82)"
               strokeWidth="2"
             />

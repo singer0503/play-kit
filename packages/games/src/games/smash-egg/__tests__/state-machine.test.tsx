@@ -67,4 +67,18 @@ describe('SmashEgg — state machine', () => {
     act(() => ref.current?.pick(0));
     expect(ref.current?.getState()).toBe('won');
   });
+
+  it('選中蛋保持高亮並讓向量錘動畫時長跟隨 hammerDelayMs', () => {
+    const ref = createRef<SmashEggRef>();
+    const { container } = render(<SmashEgg ref={ref} eggs={demoEggs} hammerDelayMs={900} />, {
+      wrapper: Wrapper,
+    });
+
+    act(() => ref.current?.pick(0));
+    const picked = container.querySelector<HTMLButtonElement>('.pk-egg__stage--picked');
+    const hammer = picked?.querySelector<HTMLElement>('.pk-egg__hammer--swing');
+    expect(picked).toBeDisabled();
+    expect(hammer?.style.animationDuration).toBe('900ms');
+    expect(hammer?.querySelector('svg')).toBeInTheDocument();
+  });
 });

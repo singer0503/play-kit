@@ -58,6 +58,7 @@ export const SmashEgg = forwardRef<SmashEggRef, SmashEggProps>(function SmashEgg
   const [picked, setPicked] = useState<number | null>(null);
   const [smashed, setSmashed] = useState(false);
   const liveRegionId = useId();
+  const svgIdPrefix = `pk-egg-${liveRegionId.replace(/[^a-zA-Z0-9_-]/g, '')}`;
   const hammerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const revealRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const stateRef = useLatestRef(state);
@@ -188,15 +189,35 @@ export const SmashEgg = forwardRef<SmashEggRef, SmashEggProps>(function SmashEgg
               className={cls}
               onClick={() => pick(i)}
               disabled={state !== 'idle'}
-              aria-label={`Egg ${i + 1}`}
+              aria-label={t('smashEgg.eggLabel', { index: i + 1 })}
               aria-describedby={liveRegionId}
             >
-              <div
+              <span
                 className={`pk-egg__hammer${isPicked && !smashed ? ' pk-egg__hammer--swing' : ''}`}
+                style={
+                  isPicked && !smashed
+                    ? { animationDuration: `${Math.max(0, hammerDelayMs)}ms` }
+                    : undefined
+                }
                 aria-hidden="true"
               >
-                🔨
-              </div>
+                <svg viewBox="0 0 64 64" focusable="false" aria-hidden="true">
+                  <path
+                    d="M13 8h34a6 6 0 0 1 6 6v12a6 6 0 0 1-6 6H13a6 6 0 0 1-6-6V14a6 6 0 0 1 6-6Z"
+                    fill="var(--pk-fg-1)"
+                    stroke="var(--pk-border-strong)"
+                    strokeWidth="2"
+                  />
+                  <path d="M16 8h8v24h-8z" fill="var(--pk-fg-2)" opacity="0.72" />
+                  <path
+                    d="m38 29 9 5-17 28-9-5 17-28Z"
+                    fill="var(--pk-accent-2)"
+                    stroke="var(--pk-border-strong)"
+                    strokeWidth="1.5"
+                  />
+                  <path d="m40 34 3 2-14 22-3-2 14-22Z" fill="white" opacity="0.24" />
+                </svg>
+              </span>
               <div
                 className={`pk-egg__egg${cracked ? ' pk-egg__egg--cracked' : ''}`}
                 aria-hidden="true"
@@ -208,7 +229,13 @@ export const SmashEgg = forwardRef<SmashEggRef, SmashEggProps>(function SmashEgg
                 ) : (
                   <svg viewBox="0 0 80 100" width="80" height="100" aria-hidden="true">
                     <defs>
-                      <linearGradient id={`pk-egg-grad-${i}`} x1="0" y1="0" x2="0" y2="1">
+                      <linearGradient
+                        id={`${svgIdPrefix}-gradient-${i}`}
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
                         <stop offset="0" stopColor="oklch(0.85 0.12 80)" />
                         <stop offset="1" stopColor="oklch(0.68 0.18 40)" />
                       </linearGradient>
@@ -218,7 +245,7 @@ export const SmashEgg = forwardRef<SmashEggRef, SmashEggProps>(function SmashEgg
                       cy="55"
                       rx="32"
                       ry="42"
-                      fill={`url(#pk-egg-grad-${i})`}
+                      fill={`url(#${svgIdPrefix}-gradient-${i})`}
                       stroke="var(--pk-border-strong)"
                       strokeWidth="1"
                     />

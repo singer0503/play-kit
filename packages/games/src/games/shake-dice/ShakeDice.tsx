@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  type CSSProperties,
   forwardRef,
   useCallback,
   useEffect,
@@ -31,6 +32,23 @@ const PATTERNS: Record<number, readonly number[]> = {
   5: [1, 3, 5, 7, 9],
   6: [1, 3, 4, 6, 7, 9],
 };
+
+const MIN_DICE_COUNT = 1;
+const MAX_DICE_COUNT = 5;
+const DICE_ROW_WIDTH = 274;
+const MAX_DIE_SIZE = 64;
+
+function clampDiceCount(count: number): number {
+  return Math.min(MAX_DICE_COUNT, Math.max(MIN_DICE_COUNT, Math.round(count)));
+}
+
+function clampFaceCount(count: number): number {
+  return Math.min(12, Math.max(2, Math.round(count)));
+}
+
+function toScaledLength(value: number): string {
+  return `calc(${Number(value.toFixed(4))} * var(--pk-px, 1px))`;
+}
 
 function randomFaces(count: number, faces: number): number[] {
   return Array.from({ length: count }, () => 1 + Math.floor(Math.random() * faces));
@@ -74,6 +92,13 @@ export const ShakeDice = forwardRef<ShakeDiceRef, ShakeDiceProps>(function Shake
   const scalePolicy = useScalePolicy();
   const scaleRef = useGameScale<HTMLElement>(392, { enabled: scalePolicy === 'auto' });
   const reducedMotion = useReducedMotion();
+  const effectiveDiceCount = clampDiceCount(diceCount);
+  const effectiveFaceCount = clampFaceCount(faceCount);
+  const dieGap = effectiveDiceCount <= 3 ? 14 : 8;
+  const dieSize = Math.min(
+    MAX_DIE_SIZE,
+    (DICE_ROW_WIDTH - dieGap * (effectiveDiceCount - 1)) / effectiveDiceCount,
+  );
 
   const [state, setState] = useControlled<GameState>({
     controlled: stateProp,
@@ -86,7 +111,7 @@ export const ShakeDice = forwardRef<ShakeDiceRef, ShakeDiceProps>(function Shake
     onChange: onRemainingChange,
   });
 
-  const [current, setCurrent] = useState<number[]>(() => Array(diceCount).fill(1));
+  const [current, setCurrent] = useState<number[]>(() => Array(effectiveDiceCount).fill(1));
   const liveRegionId = useId();
   const shuffleTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const finalizeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -99,6 +124,10 @@ export const ShakeDice = forwardRef<ShakeDiceRef, ShakeDiceProps>(function Shake
     },
     [],
   );
+
+  useEffect(() => {
+    if (state === 'idle') setCurrent(Array(effectiveDiceCount).fill(1));
+  }, [effectiveDiceCount, state]);
 
   const finalize = useCallback(
     (finalFaces: readonly number[]) => {
@@ -124,11 +153,11 @@ export const ShakeDice = forwardRef<ShakeDiceRef, ShakeDiceProps>(function Shake
       if (remaining <= 0) return;
 
       const targetFaces: number[] =
-        forced && forced.length === diceCount
+        forced && forced.length === effectiveDiceCount
           ? [...forced]
-          : forcedFaces && forcedFaces.length === diceCount
+          : forcedFaces && forcedFaces.length === effectiveDiceCount
             ? [...forcedFaces]
-            : randomFaces(diceCount, faceCount);
+            : randomFaces(effectiveDiceCount, effectiveFaceCount);
 
       setState('playing');
       onStart?.();
@@ -142,7 +171,7 @@ export const ShakeDice = forwardRef<ShakeDiceRef, ShakeDiceProps>(function Shake
       if (shuffleTimerRef.current) clearInterval(shuffleTimerRef.current);
       shuffleTimerRef.current = setInterval(() => {
         if (stateRef.current !== 'playing') return;
-        setCurrent(randomFaces(diceCount, faceCount));
+        setCurrent(randomFaces(effectiveDiceCount, effectiveFaceCount));
       }, 80);
       finalizeTimerRef.current = setTimeout(() => {
         if (shuffleTimerRef.current) clearInterval(shuffleTimerRef.current);
@@ -153,8 +182,8 @@ export const ShakeDice = forwardRef<ShakeDiceRef, ShakeDiceProps>(function Shake
     [
       state,
       remaining,
-      diceCount,
-      faceCount,
+      effectiveDiceCount,
+      effectiveFaceCount,
       forcedFaces,
       reducedMotion,
       shakeDurationMs,
@@ -167,9 +196,9 @@ export const ShakeDice = forwardRef<ShakeDiceRef, ShakeDiceProps>(function Shake
   const reset = useCallback(() => {
     if (shuffleTimerRef.current) clearInterval(shuffleTimerRef.current);
     if (finalizeTimerRef.current) clearTimeout(finalizeTimerRef.current);
-    setCurrent(Array(diceCount).fill(1));
+    setCurrent(Array(effectiveDiceCount).fill(1));
     setState('idle');
-  }, [diceCount, setState]);
+  }, [effectiveDiceCount, setState]);
 
   const claim = useCallback(() => {
     if (state !== 'won') return;
@@ -198,13 +227,18 @@ export const ShakeDice = forwardRef<ShakeDiceRef, ShakeDiceProps>(function Shake
     state !== 'playing' && state !== 'claimed' && state !== 'cooldown' && remaining > 0;
   const announce =
     state === 'won' ? t('common.congrats') : state === 'lost' ? t('common.soClose') : '';
+  const rootStyle = {
+    ...style,
+    '--pk-sd-die-size': toScaledLength(dieSize),
+    '--pk-sd-die-gap': toScaledLength(dieGap),
+  } as CSSProperties;
 
   return (
     <section
       ref={scaleRef}
       {...rest}
       id={id}
-      style={style}
+      style={rootStyle}
       className={['pk-game', 'pk-sd', className].filter(Boolean).join(' ')}
       aria-label={ariaLabel ?? t('shakeDice.title')}
     >
@@ -222,7 +256,8 @@ export const ShakeDice = forwardRef<ShakeDiceRef, ShakeDiceProps>(function Shake
         <div className={`pk-sd__cup${shaking ? ' pk-sd__cup--shaking' : ''}`}>
           <div className="pk-sd__row">
             {current.map((face, i) => {
-              const active = new Set(PATTERNS[face] ?? []);
+              const pattern = PATTERNS[face];
+              const active = new Set(pattern ?? []);
               return (
                 <div
                   // biome-ignore lint/suspicious/noArrayIndexKey: dice 位置由 i 固定決定
@@ -231,13 +266,17 @@ export const ShakeDice = forwardRef<ShakeDiceRef, ShakeDiceProps>(function Shake
                   role="img"
                   aria-label={t('shakeDice.dieLabel', { index: i + 1, face })}
                 >
-                  {Array.from({ length: 9 }, (_, pipIdx) => (
-                    <span
-                      // biome-ignore lint/suspicious/noArrayIndexKey: pip 位置固定
-                      key={pipIdx}
-                      className={`pk-sd__pip${active.has(pipIdx + 1) ? '' : ' pk-sd__pip--hidden'}`}
-                    />
-                  ))}
+                  {pattern ? (
+                    Array.from({ length: 9 }, (_, pipIdx) => (
+                      <span
+                        // biome-ignore lint/suspicious/noArrayIndexKey: pip 位置固定
+                        key={pipIdx}
+                        className={`pk-sd__pip${active.has(pipIdx + 1) ? '' : ' pk-sd__pip--hidden'}`}
+                      />
+                    ))
+                  ) : (
+                    <span className="pk-sd__face-number">{face}</span>
+                  )}
                 </div>
               );
             })}
@@ -250,7 +289,7 @@ export const ShakeDice = forwardRef<ShakeDiceRef, ShakeDiceProps>(function Shake
       </div>
       {state === 'won' ? <Confetti /> : null}
       <div className="pk-sd__cta">
-        {state === 'idle' || state === 'lost' ? (
+        {state === 'idle' ? (
           <Button
             variant="primary"
             onClick={() => roll()}

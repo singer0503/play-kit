@@ -37,9 +37,11 @@
 .pk-egg__stage:hover:not(:disabled):not(.pk-egg__stage--dim) .pk-egg__egg {
   transform: translateY(calc(-4 * var(--pk-px, 1px)));
 }
-.pk-egg__stage:disabled,
+.pk-egg__stage:disabled:not(.pk-egg__stage--picked),
 .pk-egg__stage--dim {
   opacity: 0.35;
+}
+.pk-egg__stage:disabled {
   cursor: not-allowed;
 }
 .pk-egg__stage--picked {
@@ -53,31 +55,42 @@
 
 .pk-egg__hammer {
   position: absolute;
-  top: 0;
-  left: 50%;
-  font-size: calc(32 * var(--pk-px, 1px));
+  top: calc(14 * var(--pk-px, 1px));
+  left: calc(50% + 18 * var(--pk-px, 1px));
+  width: calc(48 * var(--pk-px, 1px));
+  height: calc(48 * var(--pk-px, 1px));
   opacity: 0;
-  transform: translate(-50%, calc(-30 * var(--pk-px, 1px))) rotate(-60deg);
-  transform-origin: bottom left;
+  transform: translate(-50%, calc(-14 * var(--pk-px, 1px))) rotate(-48deg);
+  transform-origin: 30% 82%;
   transition: opacity var(--pk-duration-fast) ease;
+  pointer-events: none;
+  z-index: 2;
+}
+.pk-egg__hammer svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 calc(5 * var(--pk-px, 1px)) calc(7 * var(--pk-px, 1px)) rgba(0, 0, 0, 0.45));
 }
 .pk-egg__hammer--swing {
   opacity: 1;
-  animation: pk-egg-swing 0.7s ease-in forwards;
+  animation-name: pk-egg-swing;
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: forwards;
 }
 @keyframes pk-egg-swing {
   0% {
-    transform: translate(-50%, calc(-30 * var(--pk-px, 1px))) rotate(-60deg);
+    transform: translate(-50%, calc(-14 * var(--pk-px, 1px))) rotate(-48deg);
     opacity: 0;
   }
-  30% {
+  20% {
     opacity: 1;
   }
-  70% {
-    transform: translate(-50%, calc(-10 * var(--pk-px, 1px))) rotate(-60deg);
+  65% {
+    transform: translate(-50%, calc(-8 * var(--pk-px, 1px))) rotate(-38deg);
   }
   100% {
-    transform: translate(-50%, calc(-10 * var(--pk-px, 1px))) rotate(30deg);
+    transform: translate(-55%, calc(4 * var(--pk-px, 1px))) rotate(22deg);
     opacity: 1;
   }
 }
@@ -89,6 +102,11 @@
   place-items: center;
   transition: transform var(--pk-duration-fast) ease;
   position: relative;
+}
+.pk-egg__egg > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 .pk-egg__egg--cracked {
   animation: pk-egg-crack 0.3s;
@@ -106,6 +124,10 @@
   }
 }
 .pk-egg__reveal {
+  max-width: calc(96 * var(--pk-px, 1px));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   padding: calc(6 * var(--pk-px, 1px)) calc(10 * var(--pk-px, 1px));
   background: radial-gradient(
     circle,

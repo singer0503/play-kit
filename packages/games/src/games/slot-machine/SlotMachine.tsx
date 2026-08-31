@@ -154,6 +154,7 @@ export const SlotMachine = forwardRef<SlotMachineRef, SlotMachineProps>(function
     (forced?: readonly number[]) => {
       if (state === 'playing' || state === 'claimed' || state === 'cooldown') return;
       if (remaining <= 0) return;
+      if (reelCount <= 0 || symbols.length === 0) return;
 
       // 決定最終 reels
       const target: number[] = (() => {
@@ -191,6 +192,15 @@ export const SlotMachine = forwardRef<SlotMachineRef, SlotMachineProps>(function
 
       // 各 reel 依 stopTimes[i] 停下；從當前 offset 順勢多捲 N 圈再停到目標 symbol。
       // finalY 必為 SYMBOL_H 的整數倍（snap），symbol 才會正好完整置中於 viewport。
+      const resolvedStopTimes = target.map((_, i) =>
+        Math.max(
+          0,
+          stopTimes[i] ??
+            DEFAULT_STOP_TIMES[i] ??
+            DEFAULT_STOP_TIMES[DEFAULT_STOP_TIMES.length - 1] ??
+            2400,
+        ),
+      );
       stopTimersRef.current = target.map((finalSym, i) =>
         setTimeout(() => {
           if (stateRef.current !== 'playing') return;
@@ -213,10 +223,16 @@ export const SlotMachine = forwardRef<SlotMachineRef, SlotMachineProps>(function
             el.style.transform = `translateY(${finalY * scale}px)`;
             offsetsRef.current[i] = finalY;
           }
-          // 最後一個 reel 停下立刻 finalize（state=won/lost），CSS transition 在畫面繼續跑
-          if (i === reelCount - 1) finalize(target);
-        }, stopTimes[i] ?? 2400),
+        }, resolvedStopTimes[i] ?? 0),
       );
+      const settleTimer = setTimeout(
+        () => {
+          if (stateRef.current !== 'playing') return;
+          finalize(target);
+        },
+        Math.max(...resolvedStopTimes) + LAND_MS,
+      );
+      stopTimersRef.current.push(settleTimer);
     },
     [
       state,

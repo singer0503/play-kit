@@ -72,4 +72,21 @@ describe('GuessGift — state machine', () => {
     act(() => ref.current?.start());
     expect(ref.current?.getState()).toBe('idle');
   });
+
+  it('ballCupIndex 在初始受控結果畫面也會指向後端球位', () => {
+    const ref = createRef<GuessGiftRef>();
+    render(<GuessGift ref={ref} state="won" ballCupIndex={2} />, { wrapper: Wrapper });
+    expect(ref.current?.getBallCup()).toBe(2);
+  });
+
+  it('cupCount 限制為 2–5 且所有 slot 位置使用 RWD scale 變數', () => {
+    const { container } = render(<GuessGift cupCount={9} swapDurationMs={420} />, {
+      wrapper: Wrapper,
+    });
+    const slots = container.querySelectorAll<HTMLElement>('.pk-gg__slot');
+    const root = container.querySelector<HTMLElement>('.pk-gg');
+    expect(slots).toHaveLength(5);
+    for (const slot of slots) expect(slot.style.left).toContain('var(--pk-px');
+    expect(root?.style.getPropertyValue('--pk-gg-swap-duration')).toBe('420ms');
+  });
 });

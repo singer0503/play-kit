@@ -66,4 +66,17 @@ describe('GiftBox — state machine', () => {
     const boxes = container.querySelectorAll('button[aria-label*="box" i]');
     for (const b of boxes) expect(b).toBeDisabled();
   });
+
+  it('pick 後立即開始開盒動畫並與 openDelayMs 同步', () => {
+    const ref = createRef<GiftBoxRef>();
+    const { container } = render(<GiftBox ref={ref} boxes={demoBoxes} openDelayMs={850} />, {
+      wrapper: Wrapper,
+    });
+
+    act(() => ref.current?.pick(0));
+    const root = container.querySelector<HTMLElement>('.pk-gb');
+    const picked = container.querySelector('.pk-gb__box--picked');
+    expect(picked).toHaveClass('pk-gb__box--open');
+    expect(root?.style.getPropertyValue('--pk-gb-open-duration')).toBe('850ms');
+  });
 });

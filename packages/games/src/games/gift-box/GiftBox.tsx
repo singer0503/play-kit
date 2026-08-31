@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  type CSSProperties,
   forwardRef,
   useCallback,
   useEffect,
@@ -72,6 +73,7 @@ export const GiftBox = forwardRef<GiftBoxRef, GiftBoxProps>(function GiftBox(
       if (i < 0 || i >= boxes.length) return;
       const prize = boxes[i];
       if (!prize) return;
+      if (timerRef.current) clearTimeout(timerRef.current);
       setPicked(i);
       setState('playing');
       onStart?.();
@@ -134,13 +136,17 @@ export const GiftBox = forwardRef<GiftBoxRef, GiftBoxProps>(function GiftBox(
       : state === 'lost'
         ? t('luckyWheel.announceLost')
         : '';
+  const rootStyle = {
+    ...style,
+    '--pk-gb-open-duration': `${Math.max(0, openDelayMs)}ms`,
+  } as CSSProperties;
 
   return (
     <section
       ref={scaleRef}
       {...rest}
       id={id}
-      style={style}
+      style={rootStyle}
       className={['pk-game', 'pk-gb', className].filter(Boolean).join(' ')}
       aria-label={ariaLabel ?? t('giftBox.title')}
     >
@@ -153,7 +159,7 @@ export const GiftBox = forwardRef<GiftBoxRef, GiftBoxProps>(function GiftBox(
       <div className="pk-gb__row">
         {boxes.map((b, i) => {
           const isPicked = picked === i;
-          const isOpen = isPicked && (state === 'won' || state === 'lost' || state === 'claimed');
+          const isOpen = isPicked && state !== 'idle';
           const isDim = picked !== null && picked !== i;
           const cls = [
             'pk-gb__box',
@@ -170,7 +176,7 @@ export const GiftBox = forwardRef<GiftBoxRef, GiftBoxProps>(function GiftBox(
               className={cls}
               onClick={() => pick(i)}
               disabled={state !== 'idle'}
-              aria-label={`Gift box ${i + 1}`}
+              aria-label={t('giftBox.boxLabel', { index: i + 1 })}
               aria-describedby={liveRegionId}
             >
               <div className="pk-gb__body" aria-hidden="true" />

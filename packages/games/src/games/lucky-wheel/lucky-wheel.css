@@ -14,6 +14,8 @@
   align-items: center;
   gap: calc(28 * var(--pk-px, 1px));
   padding: calc(16 * var(--pk-px, 1px));
+  width: 100%;
+  max-width: calc(372 * var(--pk-px, 1px));
 }
 
 .pk-lw__meta {
@@ -90,6 +92,8 @@
 
 .pk-lw__svg {
   position: relative;
+  width: calc(300 * var(--pk-px, 1px));
+  height: calc(300 * var(--pk-px, 1px));
   z-index: 2;
   filter: drop-shadow(
     0 calc(12 * var(--pk-px, 1px)) calc(30 * var(--pk-px, 1px)) rgba(0, 0, 0, 0.5)
@@ -103,6 +107,11 @@
   transform: translateX(-50%);
   z-index: 4;
   filter: drop-shadow(0 calc(6 * var(--pk-px, 1px)) calc(12 * var(--pk-px, 1px)) rgba(0, 0, 0, 0.5));
+}
+.pk-lw__pointer svg {
+  display: block;
+  width: calc(38 * var(--pk-px, 1px));
+  height: calc(52 * var(--pk-px, 1px));
 }
 
 .pk-lw__hub {
@@ -145,6 +154,7 @@
   display: flex;
   gap: calc(12 * var(--pk-px, 1px));
   align-items: center;
+  max-width: 100%;
   min-height: calc(44 * var(--pk-px, 1px));
 }
 
