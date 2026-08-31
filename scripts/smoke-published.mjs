@@ -250,10 +250,14 @@ process.stdout.write(html);
   // 8.1 sub-path 只引一款 game 應在 6 KB gzip 內
   // 8.2 main barrel 只引一款 game 也該 tree-shake 到接近一樣（rollup multi-entry 副作用）
   // 8.3 全 17 款 main barrel 設上限避免 size creep
+  const bundleEntryPath = JSON.stringify(join(TEMP, '_bundle_entry.tsx'));
+  const bundleOutputPath = JSON.stringify(join(TEMP, '_bundle_out.js'));
   const sizeProbeCode = `
 import { build } from 'esbuild';
 import { writeFileSync, readFileSync, statSync } from 'node:fs';
 import { gzipSync } from 'node:zlib';
+const entryPath = ${bundleEntryPath};
+const outputPath = ${bundleOutputPath};
 const cases = [
   ['only-LuckyWheel-subpath', "import { LuckyWheel } from '@play-kit/games/lucky-wheel'; export default LuckyWheel;"],
   ['only-LuckyWheel-barrel',  "import { LuckyWheel } from '@play-kit/games'; export default LuckyWheel;"],
@@ -261,17 +265,17 @@ const cases = [
 ];
 const out = {};
 for (const [label, code] of cases) {
-  writeFileSync('${TEMP}/_bundle_entry.tsx', code);
+  writeFileSync(entryPath, code);
   await build({
-    entryPoints: ['${TEMP}/_bundle_entry.tsx'],
+    entryPoints: [entryPath],
     bundle: true, minify: true, format: 'esm', platform: 'browser',
-    outfile: '${TEMP}/_bundle_out.js',
+    outfile: outputPath,
     external: ['react', 'react-dom', 'react/jsx-runtime'],
     treeShaking: true, legalComments: 'none',
   });
   out[label] = {
-    raw: statSync('${TEMP}/_bundle_out.js').size,
-    gzip: gzipSync(readFileSync('${TEMP}/_bundle_out.js')).length,
+    raw: statSync(outputPath).size,
+    gzip: gzipSync(readFileSync(outputPath)).length,
   };
 }
 process.stdout.write(JSON.stringify(out));
