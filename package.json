@@ -10,7 +10,7 @@
   },
   "scripts": {
     "dev": "pnpm -C apps/docs dev",
-    "build": "pnpm -r --filter '@play-kit/*' build && pnpm -C apps/docs build",
+    "build": "pnpm -r --filter \"@play-kit/*\" build",
     "build:lib": "pnpm -C packages/games build",
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck",

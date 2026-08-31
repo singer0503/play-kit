@@ -61,9 +61,9 @@ test.describe('smoke: 首頁與導航', () => {
     // hero
     await expect(page.locator('.docs-hero, .docs-home').first()).toBeVisible();
 
-    // sidebar 17 個 navitem
-    const navItems = page.locator('.docs-navitem');
-    await expect(navItems).toHaveCount(17);
+    // 只計遊戲導航；外部資源也共用 docs-navitem class，但不屬於 game registry。
+    const navItems = page.locator('.docs-navitem:not(.docs-navitem--external)');
+    await expect(navItems).toHaveCount(GAMES.length);
   });
 
   test('側邊欄點擊切到不同 game，URL hash 跟著變', async ({ page }) => {
